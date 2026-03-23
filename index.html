@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Patient Monitor</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 30px;
+      margin: 20px auto;
+      width: 300px;
+      border-radius: 15px;
+      font-size: 28px;
+    }
+
+    .normal { color: #22c55e; }
+    .warning { color: #facc15; }
+    .danger { color: #ef4444; }
+
+  </style>
+</head>
+
+<body>
+
+<h1>🏥 Patient Monitoring Dashboard</h1>
+
+<div class="card">
+  ❤️ HR: <span id="hr">--</span>
+</div>
+
+<div class="card">
+  📊 Status: <span id="status">--</span>
+</div>
+
+<script>
+async function getData() {
+  const res = await fetch('/data');   // 🔥 IMPORTANT FIX
+  const data = await res.json();
+
+  let hr = data.hr;
+  let status = document.getElementById("status");
+
+  // No finger case
+  if (hr === "--") {
+    document.getElementById("hr").innerText = "--";
+    status.innerText = "No Signal";
+    status.className = "danger";
+    return;
+  }
+
+  document.getElementById("hr").innerText = hr;
+
+  // Status logic
+  if (hr >= 60 && hr <= 100) {
+    status.innerText = "Normal";
+    status.className = "normal";
+  } 
+  else if (hr > 100 && hr <= 120) {
+    status.innerText = "Elevated";
+    status.className = "warning";
+  } 
+  else {
+    status.innerText = "Danger";
+    status.className = "danger";
+  }
+}
+
+// Update every second
+setInterval(getData, 1000);
+</script>
+
+</body>
+</html>
