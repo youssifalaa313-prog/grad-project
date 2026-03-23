@@ -1,83 +1,258 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Patient Monitor</title>
+<meta charset="UTF-8">
+<title>ICU Monitoring System</title>
 
-  <style>
-    body {
-      font-family: Arial;
-      background: #0f172a;
-      color: white;
-      text-align: center;
-    }
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    h1 {
-      margin-top: 20px;
-    }
+<style>
+body {
+  font-family: 'Segoe UI';
+  background: linear-gradient(135deg, #0a0a1a, #1a1a3a);
+  color: white;
+  margin: 0;
+}
 
-    .card {
-      background: #1e293b;
-      padding: 30px;
-      margin: 20px auto;
-      width: 300px;
-      border-radius: 15px;
-      font-size: 28px;
-    }
+/* HEADER */
+.header {
+  text-align: center;
+  padding: 30px;
+}
 
-    .normal { color: #22c55e; }
-    .warning { color: #facc15; }
-    .danger { color: #ef4444; }
+.header h1 {
+  font-size: 2.5rem;
+  color: #00d4ff;
+}
 
-  </style>
+/* ROOMS GRID */
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+/* ROOM CARD */
+.room-card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.room-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px #00d4ff;
+}
+
+.status-normal { color: #2ecc71; }
+.status-warning { color: #f1c40f; }
+.status-critical { color: #e74c3c; }
+
+/* PATIENT PAGE */
+#patientPage {
+  display: none;
+  padding: 20px;
+}
+
+.back-btn {
+  margin-bottom: 20px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+/* HR CIRCLE */
+.hr-container {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.hr-circle {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 4px solid #00d4ff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.5rem;
+  box-shadow: 0 0 30px #00d4ff;
+}
+
+.hr-circle small {
+  font-size: 1rem;
+}
+
+/* VITALS */
+.vitals {
+  text-align: center;
+  font-size: 1.2rem;
+  line-height: 2;
+}
+
+/* ECG */
+.ecg-box {
+  margin-top: 40px;
+  padding: 20px;
+  background: #0f172a;
+  border-radius: 10px;
+  height: 250px;
+  box-shadow: 0 0 20px #00d4ff;
+}
+
+.ecg-box canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+</style>
 </head>
 
 <body>
 
-<h1>🏥 Patient Monitoring Dashboard</h1>
+<!-- ROOMS -->
+<div id="roomsPage">
+  <div class="header">
+    <h1>ICU Monitoring System</h1>
+    <p>Real-time patient vitals</p>
+  </div>
 
-<div class="card">
-  ❤️ HR: <span id="hr">--</span>
+  <div class="rooms-grid" id="roomsGrid"></div>
 </div>
 
-<div class="card">
-  📊 Status: <span id="status">--</span>
+<!-- PATIENT -->
+<div id="patientPage">
+  <button class="back-btn" onclick="showRooms()">⬅ Back</button>
+
+  <h2 id="patientName" style="text-align:center;"></h2>
+
+  <div class="hr-container">
+    <div class="hr-circle">
+      <span id="hrValue">--</span>
+      <small>BPM</small>
+    </div>
+  </div>
+
+  <div class="vitals">
+    <p>🩸 SpO2: <span id="spo2"></span>%</p>
+    <p>🌡 Temp: <span id="temp"></span> °C</p>
+    <p>💉 BP: <span id="bp"></span></p>
+    <p id="status"></p>
+  </div>
+
+  <div class="ecg-box">
+    <canvas id="chart"></canvas>
+  </div>
 </div>
 
 <script>
-async function getData() {
-  const res = await fetch('/data');   // 🔥 IMPORTANT FIX
-  const data = await res.json();
+// 🔥 PATIENTS
+const rooms = [
+  { id: 1, name: "Youssif" },
+  { id: 2, name: "Malak" },
+  { id: 3, name: "Hana" },
+  { id: 4, name: "Farah" },
+  { id: 5, name: "Razan" }
+];
 
-  let hr = data.hr;
-  let status = document.getElementById("status");
+// 🔁 GENERATE RANDOM DATA
+function generateData(name) {
+  const hr = Math.floor(Math.random() * 50) + 60;
+  const spo2 = Math.floor(Math.random() * 5) + 95;
+  const temp = (Math.random() * 2 + 36).toFixed(1);
+  const bp = `${110 + Math.floor(Math.random()*30)}/${70 + Math.floor(Math.random()*20)}`;
 
-  // No finger case
-  if (hr === "--") {
-    document.getElementById("hr").innerText = "--";
-    status.innerText = "No Signal";
-    status.className = "danger";
-    return;
-  }
+  let status = "Normal";
+  if (hr > 100) status = "Critical";
+  else if (hr > 85) status = "Warning";
 
-  document.getElementById("hr").innerText = hr;
-
-  // Status logic
-  if (hr >= 60 && hr <= 100) {
-    status.innerText = "Normal";
-    status.className = "normal";
-  } 
-  else if (hr > 100 && hr <= 120) {
-    status.innerText = "Elevated";
-    status.className = "warning";
-  } 
-  else {
-    status.innerText = "Danger";
-    status.className = "danger";
-  }
+  return { name, hr, spo2, temp, bp, status };
 }
 
-// Update every second
-setInterval(getData, 1000);
+// STORE CURRENT DATA
+let currentData = {};
+
+// 🚀 RENDER ROOMS
+function renderRooms() {
+  const grid = document.getElementById("roomsGrid");
+
+  let html = "";
+
+  rooms.forEach(r => {
+    const d = generateData(r.name);
+    currentData[r.id] = d;
+
+    html += `
+      <div class="room-card" onclick="openRoom(${r.id})">
+        <h2>Room ${100 + r.id}</h2>
+        <p>${d.name}</p>
+        <p>❤️ ${d.hr} BPM</p>
+        <p class="status-${d.status.toLowerCase()}">${d.status}</p>
+      </div>
+    `;
+  });
+
+  grid.innerHTML = html;
+}
+
+// 🚀 OPEN ROOM
+function openRoom(id) {
+  document.getElementById("roomsPage").style.display = "none";
+  document.getElementById("patientPage").style.display = "block";
+
+  updatePatient(id);
+}
+
+// 🔄 UPDATE PATIENT LIVE
+function updatePatient(id) {
+  const d = generateData(rooms[id-1].name);
+
+  document.getElementById("patientName").innerText = d.name;
+  document.getElementById("hrValue").innerText = d.hr;
+  document.getElementById("spo2").innerText = d.spo2;
+  document.getElementById("temp").innerText = d.temp;
+  document.getElementById("bp").innerText = d.bp;
+  document.getElementById("status").innerText = d.status;
+
+  drawChart();
+}
+
+// 🔙 BACK
+function showRooms() {
+  document.getElementById("roomsPage").style.display = "block";
+  document.getElementById("patientPage").style.display = "none";
+}
+
+// 📈 ECG
+function drawChart() {
+  const ctx = document.getElementById("chart");
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: Array(40).fill(""),
+      datasets: [{
+        data: Array.from({length:40}, () => Math.random()*100),
+        borderColor: "#00d4ff",
+        tension: 0.4,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false }},
+      scales: { x: {display:false}, y: {display:false}}
+    }
+  });
+}
+
+// 🔁 AUTO UPDATE ROOMS
+setInterval(renderRooms, 2000);
+
+// START
+window.onload = renderRooms;
 </script>
 
 </body>
