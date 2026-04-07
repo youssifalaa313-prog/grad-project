@@ -1,230 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>ICU Monitoring System</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-body {
-  font-family: 'Segoe UI';
-  background: linear-gradient(135deg, #0a0a1a, #1a1a3a);
-  color: white;
-  margin: 0;
-}
-
-.header {
-  text-align: center;
-  padding: 30px;
-}
-
-.header h1 {
-  font-size: 2.5rem;
-  color: #00d4ff;
-}
-
-.rooms-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-  padding: 20px;
-}
-
-.room-card {
-  background: #1e293b;
-  padding: 20px;
-  border-radius: 15px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.room-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 20px #00d4ff;
-}
-
-.status-normal { color: #2ecc71; }
-.status-warning { color: #f1c40f; }
-.status-critical { color: #e74c3c; }
-
-#patientPage {
-  display: none;
-  padding: 20px;
-}
-
-.back-btn {
-  margin-bottom: 20px;
-  padding: 10px;
-  cursor: pointer;
-}
-
-.hr-container {
-  display: flex;
-  justify-content: center;
-  margin: 30px 0;
-}
-
-.hr-circle {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  border: 4px solid #00d4ff;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  font-size: 2.5rem;
-  box-shadow: 0 0 30px #00d4ff;
-}
-
-.hr-circle small {
-  font-size: 1rem;
-}
-
-.vitals {
-  text-align: center;
-  font-size: 1.2rem;
-  line-height: 2;
-}
-
-.ecg-box {
-  margin-top: 40px;
-  padding: 20px;
-  background: #0f172a;
-  border-radius: 10px;
-  height: 250px;
-  box-shadow: 0 0 20px #00d4ff;
-}
-
-.ecg-box canvas {
-  width: 100% !important;
-  height: 100% !important;
-}
-</style>
+<title>ICU Monitor</title>
 </head>
 
 <body>
 
-<div id="roomsPage">
-  <div class="header">
-    <h1>ICU Monitoring System</h1>
-    <p>Real-time patient vitals</p>
-  </div>
+<h1>ICU Monitoring</h1>
 
-  <div class="rooms-grid" id="roomsGrid"></div>
-</div>
-
-<div id="patientPage">
-  <button class="back-btn" onclick="showRooms()">⬅ Back</button>
-
-  <h2 id="patientName" style="text-align:center;"></h2>
-
-  <div class="hr-container">
-    <div class="hr-circle">
-      <span id="hrValue">--</span>
-      <small>BPM</small>
-    </div>
-  </div>
-
-  <div class="vitals">
-    <p>🩸 SpO2: <span id="spo2"></span>%</p>
-    <p>🌡 Temp: <span id="temp"></span> °C</p>
-    <p>💉 BP: <span id="bp"></span></p>
-    <p id="status"></p>
-  </div>
-
-  <div class="ecg-box">
-    <canvas id="chart"></canvas>
-  </div>
-</div>
+<div id="data"></div>
 
 <script>
-let interval;
-
-/* 🚀 GET ROOMS FROM SERVER */
-async function renderRooms() {
-  const res = await fetch('/rooms');
-  const data = await res.json();
-
-  const grid = document.getElementById("roomsGrid");
-  let html = "";
-
-  Object.keys(data).forEach(id => {
-    const d = data[id];
-
-    html += `
-      <div class="room-card" onclick="openRoom(${id})">
-        <h2>Room ${id}</h2>
-        <p>${d.name}</p>
-        <p>❤️ ${d.hr} BPM</p>
-        <p class="status-${d.status.toLowerCase()}">${d.status}</p>
-      </div>
-    `;
-  });
-
-  grid.innerHTML = html;
-}
-
-/* 🚀 OPEN ROOM */
-function openRoom(id) {
-  document.getElementById("roomsPage").style.display = "none";
-  document.getElementById("patientPage").style.display = "block";
-
-  updatePatient(id);
-
-  clearInterval(interval);
-  interval = setInterval(() => updatePatient(id), 2000);
-}
-
-/* 🔄 GET SINGLE ROOM */
-async function updatePatient(id) {
-  const res = await fetch(`/room/${id}`);
+async function update() {
+  const res = await fetch('/room/101');
   const d = await res.json();
 
-  document.getElementById("patientName").innerText = d.name;
-  document.getElementById("hrValue").innerText = d.hr;
-  document.getElementById("spo2").innerText = d.spo2;
-  document.getElementById("temp").innerText = d.temp;
-  document.getElementById("bp").innerText = d.bp;
-  document.getElementById("status").innerText = d.status;
-
-  drawChart();
+  document.getElementById("data").innerHTML = `
+    <p>Name: ${d.name}</p>
+    <p>HR: ${d.hr}</p>
+    <p>SpO2: ${d.spo2}</p>
+    <p>Body Temp: ${d.bodyTemp}</p>
+    <p>Room Temp: ${d.roomTemp}</p>
+    <p>Humidity: ${d.humidity}</p>
+    <p>Water: ${d.water}</p>
+    <p>Motion: ${d.motion}</p>
+    <p>BP: ${d.bp}</p>
+    <p>Status: ${d.status}</p>
+  `;
 }
 
-/* 🔙 BACK */
-function showRooms() {
-  document.getElementById("roomsPage").style.display = "block";
-  document.getElementById("patientPage").style.display = "none";
-  clearInterval(interval);
-}
-
-/* 📈 ECG */
-function drawChart() {
-  const ctx = document.getElementById("chart");
-
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: Array(40).fill(""),
-      datasets: [{
-        data: Array.from({length:40}, () => Math.random()*100),
-        borderColor: "#00d4ff",
-        tension: 0.4,
-        borderWidth: 2
-      }]
-    },
-    options: {
-      plugins: { legend: { display: false }},
-      scales: { x: {display:false}, y: {display:false}}
-    }
-  });
-}
-
-/* 🔁 AUTO REFRESH */
-setInterval(renderRooms, 2000);
-
-window.onload = renderRooms;
+setInterval(update, 2000);
+update();
 </script>
 
 </body>
