@@ -14,7 +14,6 @@ body {
   margin: 0;
 }
 
-/* HEADER */
 .header {
   text-align: center;
   padding: 30px;
@@ -25,7 +24,6 @@ body {
   color: #00d4ff;
 }
 
-/* ROOMS GRID */
 .rooms-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -33,7 +31,6 @@ body {
   padding: 20px;
 }
 
-/* ROOM CARD */
 .room-card {
   background: #1e293b;
   padding: 20px;
@@ -51,7 +48,6 @@ body {
 .status-warning { color: #f1c40f; }
 .status-critical { color: #e74c3c; }
 
-/* PATIENT PAGE */
 #patientPage {
   display: none;
   padding: 20px;
@@ -63,7 +59,6 @@ body {
   cursor: pointer;
 }
 
-/* HR CIRCLE */
 .hr-container {
   display: flex;
   justify-content: center;
@@ -87,14 +82,12 @@ body {
   font-size: 1rem;
 }
 
-/* VITALS */
 .vitals {
   text-align: center;
   font-size: 1.2rem;
   line-height: 2;
 }
 
-/* ECG */
 .ecg-box {
   margin-top: 40px;
   padding: 20px;
@@ -113,7 +106,6 @@ body {
 
 <body>
 
-<!-- ROOMS -->
 <div id="roomsPage">
   <div class="header">
     <h1>ICU Monitoring System</h1>
@@ -123,7 +115,6 @@ body {
   <div class="rooms-grid" id="roomsGrid"></div>
 </div>
 
-<!-- PATIENT -->
 <div id="patientPage">
   <button class="back-btn" onclick="showRooms()">⬅ Back</button>
 
@@ -149,45 +140,22 @@ body {
 </div>
 
 <script>
-// 🔥 PATIENTS
-const rooms = [
-  { id: 1, name: "Youssif" },
-  { id: 2, name: "Malak" },
-  { id: 3, name: "Hana" },
-  { id: 4, name: "Farah" },
-  { id: 5, name: "Razan" }
-];
+let interval;
 
-// 🔁 GENERATE RANDOM DATA
-function generateData(name) {
-  const hr = Math.floor(Math.random() * 50) + 60;
-  const spo2 = Math.floor(Math.random() * 5) + 95;
-  const temp = (Math.random() * 2 + 36).toFixed(1);
-  const bp = `${110 + Math.floor(Math.random()*30)}/${70 + Math.floor(Math.random()*20)}`;
+/* 🚀 GET ROOMS FROM SERVER */
+async function renderRooms() {
+  const res = await fetch('/rooms');
+  const data = await res.json();
 
-  let status = "Normal";
-  if (hr > 100) status = "Critical";
-  else if (hr > 85) status = "Warning";
-
-  return { name, hr, spo2, temp, bp, status };
-}
-
-// STORE CURRENT DATA
-let currentData = {};
-
-// 🚀 RENDER ROOMS
-function renderRooms() {
   const grid = document.getElementById("roomsGrid");
-
   let html = "";
 
-  rooms.forEach(r => {
-    const d = generateData(r.name);
-    currentData[r.id] = d;
+  Object.keys(data).forEach(id => {
+    const d = data[id];
 
     html += `
-      <div class="room-card" onclick="openRoom(${r.id})">
-        <h2>Room ${100 + r.id}</h2>
+      <div class="room-card" onclick="openRoom(${id})">
+        <h2>Room ${id}</h2>
         <p>${d.name}</p>
         <p>❤️ ${d.hr} BPM</p>
         <p class="status-${d.status.toLowerCase()}">${d.status}</p>
@@ -198,17 +166,21 @@ function renderRooms() {
   grid.innerHTML = html;
 }
 
-// 🚀 OPEN ROOM
+/* 🚀 OPEN ROOM */
 function openRoom(id) {
   document.getElementById("roomsPage").style.display = "none";
   document.getElementById("patientPage").style.display = "block";
 
   updatePatient(id);
+
+  clearInterval(interval);
+  interval = setInterval(() => updatePatient(id), 2000);
 }
 
-// 🔄 UPDATE PATIENT LIVE
-function updatePatient(id) {
-  const d = generateData(rooms[id-1].name);
+/* 🔄 GET SINGLE ROOM */
+async function updatePatient(id) {
+  const res = await fetch(`/room/${id}`);
+  const d = await res.json();
 
   document.getElementById("patientName").innerText = d.name;
   document.getElementById("hrValue").innerText = d.hr;
@@ -220,13 +192,14 @@ function updatePatient(id) {
   drawChart();
 }
 
-// 🔙 BACK
+/* 🔙 BACK */
 function showRooms() {
   document.getElementById("roomsPage").style.display = "block";
   document.getElementById("patientPage").style.display = "none";
+  clearInterval(interval);
 }
 
-// 📈 ECG
+/* 📈 ECG */
 function drawChart() {
   const ctx = document.getElementById("chart");
 
@@ -248,10 +221,9 @@ function drawChart() {
   });
 }
 
-// 🔁 AUTO UPDATE ROOMS
+/* 🔁 AUTO REFRESH */
 setInterval(renderRooms, 2000);
 
-// START
 window.onload = renderRooms;
 </script>
 
