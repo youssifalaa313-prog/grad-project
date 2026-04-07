@@ -3,11 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <title>ICU Monitor</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI';
+  background: #0a0f1c;
+  color: white;
+}
+
+/* HEADER */
+h1 {
+  text-align: center;
+  padding: 20px;
+  color: #00d9ff;
+}
+
+/* CARD */
+#data {
+  max-width: 500px;
+  margin: auto;
+  background: rgba(255,255,255,0.05);
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 0 20px rgba(0,217,255,0.2);
+}
+
+/* TEXT */
+p {
+  font-size: 1.2rem;
+  margin: 10px 0;
+}
+
+/* BIG HR */
+.hr {
+  font-size: 3rem;
+  text-align: center;
+  color: #00d9ff;
+  margin-bottom: 20px;
+}
+
+/* STATUS COLORS */
+.normal { color: #2ecc71; }
+.warning { color: #f1c40f; }
+.critical { color: #e74c3c; }
+
+/* BLINK */
+.blink {
+  animation: blink 1s infinite;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+</style>
+
 </head>
 
 <body>
 
-<h1>ICU Monitoring</h1>
+<h1>ICU Monitoring System</h1>
 
 <div id="data"></div>
 
@@ -16,17 +70,25 @@ async function update() {
   const res = await fetch('/room/101');
   const d = await res.json();
 
+  let statusClass = d.status.toLowerCase();
+
+  let blinkClass = d.status === "Critical" ? "blink" : "";
+
   document.getElementById("data").innerHTML = `
-    <p>Name: ${d.name}</p>
-    <p>HR: ${d.hr}</p>
-    <p>SpO2: ${d.spo2}</p>
-    <p>Body Temp: ${d.bodyTemp}</p>
-    <p>Room Temp: ${d.roomTemp}</p>
-    <p>Humidity: ${d.humidity}</p>
-    <p>Water: ${d.water}</p>
-    <p>Motion: ${d.motion}</p>
-    <p>BP: ${d.bp}</p>
-    <p>Status: ${d.status}</p>
+    <div class="hr">${d.hr} BPM</div>
+
+    <p><b>Name:</b> ${d.name}</p>
+    <p><b>SpO2:</b> ${d.spo2}%</p>
+    <p><b>Body Temp:</b> ${d.bodyTemp} °C</p>
+    <p><b>Room Temp:</b> ${d.roomTemp} °C</p>
+    <p><b>Humidity:</b> ${d.humidity}%</p>
+    <p><b>Water Level:</b> ${d.water}</p>
+    <p><b>Motion:</b> <span style="color:${d.motion === "NO" ? "red" : "lightgreen"}">${d.motion}</span></p>
+    <p><b>BP:</b> ${d.bp}</p>
+
+    <p class="${statusClass} ${blinkClass}">
+      <b>Status:</b> ${d.status}
+    </p>
   `;
 }
 
