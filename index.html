@@ -7,48 +7,112 @@
 <style>
 body {
   margin: 0;
-  font-family: 'Segoe UI';
-  background: #0a0f1c;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #0a0f1c, #111a2e);
   color: white;
 }
 
 /* HEADER */
-h1 {
+.header {
   text-align: center;
-  padding: 20px;
+  padding: 25px;
+  font-size: 28px;
+  font-weight: bold;
   color: #00d9ff;
 }
 
+/* ROOM BUTTONS */
+.room-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.room-btn {
+  padding: 15px 30px;
+  border-radius: 12px;
+  background: rgba(0,217,255,0.1);
+  border: 1px solid #00d9ff;
+  color: #00d9ff;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.room-btn:hover {
+  background: #00d9ff;
+  color: black;
+}
+
 /* CARD */
-#data {
+.card {
   max-width: 500px;
-  margin: auto;
-  background: rgba(255,255,255,0.05);
+  margin: 40px auto;
   padding: 25px;
   border-radius: 20px;
-  box-shadow: 0 0 20px rgba(0,217,255,0.2);
+  background: rgba(255,255,255,0.05);
+  box-shadow: 0 0 30px rgba(0,217,255,0.15);
+  backdrop-filter: blur(10px);
 }
 
-/* TEXT */
-p {
-  font-size: 1.2rem;
-  margin: 10px 0;
+/* PATIENT NAME */
+.name {
+  text-align: center;
+  font-size: 22px;
+  margin-bottom: 10px;
+  color: #ffffff;
 }
 
-/* BIG HR */
-.hr {
-  font-size: 3rem;
+/* ROOM TITLE */
+.room-title {
   text-align: center;
   color: #00d9ff;
   margin-bottom: 20px;
 }
 
-/* STATUS COLORS */
+/* HR BIG */
+.hr {
+  text-align: center;
+  font-size: 60px;
+  color: #00d9ff;
+  margin-bottom: 20px;
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+/* ITEM */
+.item {
+  background: rgba(255,255,255,0.05);
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.label {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.value {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* STATUS */
+.status {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 18px;
+}
+
 .normal { color: #2ecc71; }
 .warning { color: #f1c40f; }
 .critical { color: #e74c3c; }
 
-/* BLINK */
 .blink {
   animation: blink 1s infinite;
 }
@@ -61,39 +125,92 @@ p {
 
 <body>
 
-<h1>ICU Monitoring System</h1>
+<div class="header">ICU Monitoring System</div>
+
+<div class="room-container">
+  <div class="room-btn" onclick="selectRoom(101)">Room 101</div>
+  <div class="room-btn" onclick="selectRoom(102)">Room 102</div>
+</div>
 
 <div id="data"></div>
 
 <script>
-async function update() {
-  const res = await fetch('/room/101');
-  const d = await res.json();
+let currentRoom = null;
+
+/* FAKE DATA */
+const fakeData = {
+  101: {
+    name: "Ahmed Ali",
+    hr: 85,
+    spo2: 97,
+    bodyTemp: 36.9,
+    humidity: 55,
+    water: 70,
+    status: "Normal"
+  },
+  102: {
+    name: "Mohamed Hassan",
+    hr: 120,
+    spo2: 90,
+    bodyTemp: 39,
+    humidity: 65,
+    water: 40,
+    status: "Critical"
+  }
+};
+
+function selectRoom(id) {
+  currentRoom = id;
+  update();
+}
+
+function update() {
+  if (!currentRoom) return;
+
+  const d = fakeData[currentRoom];
 
   let statusClass = d.status.toLowerCase();
-
   let blinkClass = d.status === "Critical" ? "blink" : "";
 
   document.getElementById("data").innerHTML = `
-    <div class="hr">${d.hr} BPM</div>
+    <div class="card">
 
-    <p><b>Name:</b> ${d.name}</p>
-    <p><b>SpO2:</b> ${d.spo2}%</p>
-    <p><b>Body Temp:</b> ${d.bodyTemp} °C</p>
-    <p><b>Room Temp:</b> ${d.roomTemp} °C</p>
-    <p><b>Humidity:</b> ${d.humidity}%</p>
-    <p><b>Water Level:</b> ${d.water}</p>
-    <p><b>Motion:</b> <span style="color:${d.motion === "NO" ? "red" : "lightgreen"}">${d.motion}</span></p>
-    <p><b>BP:</b> ${d.bp}</p>
+      <div class="room-title">Room ${currentRoom}</div>
+      <div class="name">${d.name}</div>
 
-    <p class="${statusClass} ${blinkClass}">
-      <b>Status:</b> ${d.status}
-    </p>
+      <div class="hr">${d.hr}</div>
+
+      <div class="grid">
+        <div class="item">
+          <div class="label">SpO2</div>
+          <div class="value">${d.spo2}%</div>
+        </div>
+
+        <div class="item">
+          <div class="label">Body Temp</div>
+          <div class="value">${d.bodyTemp} °C</div>
+        </div>
+
+        <div class="item">
+          <div class="label">Humidity</div>
+          <div class="value">${d.humidity}%</div>
+        </div>
+
+        <div class="item">
+          <div class="label">Water Level</div>
+          <div class="value">${d.water}</div>
+        </div>
+      </div>
+
+      <div class="status ${statusClass} ${blinkClass}">
+        ${d.status}
+      </div>
+
+    </div>
   `;
 }
 
 setInterval(update, 2000);
-update();
 </script>
 
 </body>
