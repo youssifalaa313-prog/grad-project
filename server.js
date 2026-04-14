@@ -6,11 +6,25 @@ app.use(express.static(__dirname));
 
 // 🔥 ICU DATA (fake but ready for ESP)
 let rooms = {
-  "101": { name: "Youssif", hr: 72, spo2: 98, temp: 37, bp: "120/80", status: "Normal" },
-  "102": { name: "Malak", hr: 85, spo2: 96, temp: 37.2, bp: "130/85", status: "Warning" },
-  "103": { name: "Hana", hr: 68, spo2: 99, temp: 36.8, bp: "118/78", status: "Normal" },
-  "104": { name: "Farah", hr: 95, spo2: 94, temp: 37.6, bp: "140/90", status: "Warning" },
-  "105": { name: "Razan", hr: 110, spo2: 90, temp: 38.2, bp: "160/100", status: "Critical" }
+  let rooms = {
+  "101": { 
+    name: "Youssif", 
+    hr: 72, 
+    spo2: 98, 
+    bodyTemp: 37, 
+    humidity: 55,
+    water: 70,
+    status: "Normal" 
+  },
+  "102": { 
+    name: "Malak", 
+    hr: 85, 
+    spo2: 96, 
+    bodyTemp: 37.2, 
+    humidity: 60,
+    water: 65,
+    status: "Warning" 
+  }
 };
 
 // 📡 GET all rooms
