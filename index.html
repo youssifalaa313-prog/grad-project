@@ -8,79 +8,74 @@
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #0a0f1c, #0f1a2f);
-  color: white;
+  background: #f5f7fb;
+  color: #1e293b;
 }
 
 /* HEADER */
 .header {
   text-align: center;
-  padding: 20px;
+  padding: 25px;
   font-size: 28px;
   font-weight: bold;
-  color: #00d9ff;
-  letter-spacing: 1px;
+  color: #2563eb;
 }
 
 /* ROOM BUTTONS */
 .rooms {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 15px;
 }
 
 .room-btn {
-  padding: 12px 25px;
-  border-radius: 10px;
-  background: rgba(0,217,255,0.1);
-  border: 1px solid #00d9ff;
-  color: #00d9ff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid #dbeafe;
+  background: white;
   cursor: pointer;
   transition: 0.3s;
 }
 
 .room-btn:hover {
-  background: #00d9ff;
-  color: black;
+  background: #2563eb;
+  color: white;
 }
 
 /* CARD */
 .card {
-  max-width: 520px;
+  max-width: 550px;
   margin: 40px auto;
-  padding: 25px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.05);
-  box-shadow: 0 0 30px rgba(0,217,255,0.15);
-  backdrop-filter: blur(10px);
+  padding: 30px;
+  border-radius: 15px;
+  background: white;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
 /* TITLE */
 .room-title {
-  text-align: center;
-  color: #00d9ff;
-  margin-bottom: 5px;
+  font-size: 18px;
+  color: #64748b;
 }
 
 .name {
-  text-align: center;
-  font-size: 20px;
+  font-size: 22px;
+  font-weight: bold;
   margin-bottom: 20px;
 }
 
-/* HR BIG */
+/* HR */
 .hr {
   text-align: center;
-  font-size: 70px;
+  font-size: 65px;
   font-weight: bold;
-  color: #00d9ff;
+  color: #2563eb;
 }
 
-/* BPM label */
 .bpm {
   text-align: center;
-  color: #aaa;
-  margin-bottom: 25px;
+  color: #64748b;
+  margin-bottom: 30px;
 }
 
 /* GRID */
@@ -91,15 +86,14 @@ body {
 }
 
 .box {
-  background: rgba(255,255,255,0.05);
+  background: #f8fafc;
   padding: 15px;
-  border-radius: 12px;
-  text-align: center;
+  border-radius: 10px;
 }
 
 .label {
   font-size: 12px;
-  color: #aaa;
+  color: #64748b;
 }
 
 .value {
@@ -109,21 +103,32 @@ body {
 
 /* STATUS */
 .status {
-  text-align: center;
   margin-top: 20px;
-  font-size: 18px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 10px;
+  border-radius: 8px;
 }
 
-.normal { color: #2ecc71; }
-.warning { color: #f1c40f; }
-.critical { color: #e74c3c; }
+.normal {
+  background: #dcfce7;
+  color: #16a34a;
+}
 
-/* BLINK */
-.blink {
+.warning {
+  background: #fef9c3;
+  color: #ca8a04;
+}
+
+.critical {
+  background: #fee2e2;
+  color: #dc2626;
   animation: blink 1s infinite;
 }
+
 @keyframes blink {
-  50% { opacity: 0; }
+  50% { opacity: 0.5; }
 }
 </style>
 
@@ -157,7 +162,6 @@ async function update() {
   if (!d) return;
 
   let statusClass = (d.status || "Normal").toLowerCase();
-  let blinkClass = d.status === "Critical" ? "blink" : "";
 
   document.getElementById("data").innerHTML = `
     <div class="card">
@@ -176,21 +180,21 @@ async function update() {
 
         <div class="box">
           <div class="label">Body Temp</div>
-          <div class="value">${d.bodyTemp} °C</div>
+          <div class="value">${d.temp} °C</div>
         </div>
 
         <div class="box">
           <div class="label">Humidity</div>
-          <div class="value">${d.humidity}%</div>
+          <div class="value">${d.humidity || 40}%</div>
         </div>
 
         <div class="box">
           <div class="label">Water Level</div>
-          <div class="value">${d.water}</div>
+          <div class="value">${d.water || 70}</div>
         </div>
       </div>
 
-      <div class="status ${statusClass} ${blinkClass}">
+      <div class="status ${statusClass}">
         ${d.status}
       </div>
 
