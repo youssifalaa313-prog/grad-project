@@ -11,7 +11,11 @@ app.use(express.static(__dirname));
 /* -------- USERS (LOGIN) -------- */
 const users = {
   "youssifhouty313": "houty313",
-  "beshir21": "beshir21"
+  "beshir21": "beshir21",
+  "malakhamed4": "micky123",
+  "hanashrar1": "shrara123",
+  "farahayman3": "farah123",
+  "razanokasha6": "okasha123"
 };
 
 /* -------- LOGIN ROUTE -------- */
