@@ -5,7 +5,7 @@ const axios = require('axios');
 const app = express();
 
 /* -------- GOOGLE SCRIPT URL -------- */
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTl-roTAKEH3-nqrXiYSAjVhyd2fB_lfwpyZ3V9KDgI8Ed5zbVjImKrPFI_GTyUx7r/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvmPucVRqT1ncdsLISH-abjANLqSAy9DKviKJ521DiCLv1o88htcpeOhsPk90rqUAc/exec";
 
 /* -------- MIDDLEWARE -------- */
 app.use(cors());
