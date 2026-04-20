@@ -42,7 +42,7 @@ let rooms = {
 };
 
 /* -------- TEST -------- */
-app.get('/test', (req, res) => {
+app.get('/', (req, res) => {
   res.send("Server working 🚀");
 });
 
@@ -98,17 +98,23 @@ async function sendToGoogleSheets() {
         status: r.status
       };
 
-      await axios.post(GOOGLE_SCRIPT_URL, data, {
+      const response = await axios.post(GOOGLE_SCRIPT_URL, data, {
         headers: { "Content-Type": "application/json" }
       });
 
-      console.log(✅ Sent room ${roomId} to Google Sheets);
+      console.log(`✅ Sent room ${roomId} to Google Sheets`, response.data);
     }
 
   } catch (err) {
     console.log("❌ Error sending:", err.message);
   }
 }
+
+/* -------- MANUAL TEST ROUTE -------- */
+app.get('/test-send', async (req, res) => {
+  await sendToGoogleSheets();
+  res.send("✅ Sent to Google Sheets");
+});
 
 /* -------- CRON JOB (EVERY 6 MINUTES) -------- */
 cron.schedule("*/6 * * * *", () => {
@@ -121,4 +127,4 @@ const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log("🚀 Server running on port " + PORT);
-})
+});
