@@ -1,208 +1,306 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ICU Monitor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICU Monitor Pro</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: #f5f7fb;
-  color: #1e293b;
+:root{
+--bg:#071018;
+--panel:#0d1b2a;
+--panel2:#10263d;
+--line:#1d3a57;
+--cyan:#4de7ff;
+--green:#22c55e;
+--yellow:#facc15;
+--red:#ef4444;
+--text:#eaf6ff;
+--muted:#8aa3ba;
 }
 
-/* HEADER */
-.header {
-  text-align: center;
-  padding: 25px;
-  font-size: 28px;
-  font-weight: bold;
-  color: #2563eb;
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+font-family:Segoe UI,Arial,sans-serif;
+background:linear-gradient(135deg,#06111d,#0b1d31);
+color:var(--text);
 }
 
-/* ROOM BUTTONS */
-.rooms {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
+.wrapper{
+min-height:100vh;
+padding:20px;
 }
 
-.room-btn {
-  padding: 10px 20px;
-  border-radius: 8px;
-  border: 1px solid #dbeafe;
-  background: white;
-  cursor: pointer;
-  transition: 0.3s;
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:var(--panel);
+padding:16px 20px;
+border-radius:16px;
+border:1px solid var(--line);
+margin-bottom:18px;
 }
 
-.room-btn:hover {
-  background: #2563eb;
-  color: white;
+.title{font-size:24px;font-weight:700}
+
+.live{display:flex;align-items:center;gap:8px;color:var(--green)}
+
+.dot{
+width:10px;height:10px;border-radius:50%;
+background:var(--green);
+animation:pulse 1.5s infinite;
 }
 
-/* CARD */
-.card {
-  max-width: 550px;
-  margin: 40px auto;
-  padding: 30px;
-  border-radius: 15px;
-  background: white;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+@keyframes pulse{
+to{box-shadow:0 0 0 14px rgba(34,197,94,0)}
 }
 
-/* TITLE */
-.room-title {
-  font-size: 18px;
-  color: #64748b;
+/* HOME */
+.card{
+background:var(--panel);
+border:1px solid var(--line);
+border-radius:18px;
+padding:18px;
+margin-bottom:18px;
 }
 
-.name {
-  font-size: 22px;
-  font-weight: bold;
-  margin-bottom: 20px;
+.homeGrid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:15px;
 }
 
-/* HR */
-.hr {
-  text-align: center;
-  font-size: 65px;
-  font-weight: bold;
-  color: #2563eb;
+.homeCard{
+background:var(--panel2);
+border:1px solid var(--line);
+padding:16px;
+border-radius:14px;
+cursor:pointer;
+transition:0.3s;
 }
 
-.bpm {
-  text-align: center;
-  color: #64748b;
-  margin-bottom: 30px;
+.homeCard:hover{
+transform:scale(1.03);
+background:var(--cyan);
+color:#00131c;
 }
 
-/* GRID */
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
+/* DASHBOARD */
+.grid{
+display:grid;
+grid-template-columns:2fr 1fr;
+gap:18px;
 }
 
-.box {
-  background: #f8fafc;
-  padding: 15px;
-  border-radius: 10px;
+.patient-name{font-size:30px;font-weight:700}
+
+.sub{color:var(--muted)}
+
+.monitor{
+margin-top:18px;
+padding:18px;
+border-radius:16px;
+background:#02070d;
+border:1px solid #16324c;
 }
 
-.label {
-  font-size: 12px;
-  color: #64748b;
+.bigHr{font-size:72px;color:var(--cyan);font-weight:800}
+
+
+svg{
+width:100%;
+height:120px;
+margin-top:10px;
 }
 
-.value {
-  font-size: 22px;
-  font-weight: bold;
+/* heart rate  */
+path{
+stroke:#4de7ff;
+stroke-width:4;
+fill:none;
+stroke-dasharray:300;
+stroke-dashoffset:0;
+animation:ecg 1.5s linear infinite;
 }
+
+@keyframes ecg{
+0%{stroke-dashoffset:300}
+100%{stroke-dashoffset:0}
+}
+
+.metrics{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:14px;
+margin-top:18px;
+}
+
+.metric{
+background:var(--panel2);
+padding:16px;
+border-radius:14px;
+}
+
+.metric .label{color:var(--muted);font-size:13px}
+.metric .val{font-size:28px;font-weight:700;margin-top:6px}
 
 /* STATUS */
-.status {
-  margin-top: 20px;
-  text-align: center;
-  font-weight: bold;
-  font-size: 16px;
-  padding: 10px;
-  border-radius: 8px;
+.status{text-align:center;padding:20px}
+.status h2{font-size:30px}
+
+.normal{color:var(--green)}
+.warning{color:var(--yellow)}
+.critical{color:var(--red)}
+
+.blink{animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.4}}
+
+/* ACTIVITY */
+.table{margin-top:18px}
+.row{
+display:flex;
+justify-content:space-between;
+padding:12px 0;
+border-bottom:1px solid var(--line);
 }
 
-.normal {
-  background: #dcfce7;
-  color: #16a34a;
+/* BACK BUTTON */
+.back-btn{
+margin-bottom:15px;
+padding:10px 15px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+background:var(--cyan);
+color:#00131c;
+font-weight:bold;
 }
 
-.warning {
-  background: #fef9c3;
-  color: #ca8a04;
-}
 
-.critical {
-  background: #fee2e2;
-  color: #dc2626;
-  animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  50% { opacity: 0.5; }
+@media(max-width:900px){
+.grid{grid-template-columns:1fr}
 }
 </style>
-
 </head>
 
 <body>
 
-<div class="header">ICU Monitoring System</div>
+<div class="wrapper">
 
-<div class="rooms">
-  <div class="room-btn" onclick="selectRoom(101)">Room 101</div>
-  <div class="room-btn" onclick="selectRoom(102)">Room 102</div>
+<div class="topbar">
+<div class="title">Patient Monitoring Center</div>
+<div class="live"><span class="dot"></span>System Online</div>
 </div>
 
-<div id="data"></div>
+<!-- HOME -->
+<div id="homeScreen" class="card"></div>
+
+<!-- PATIENT VIEW -->
+<div id="data" style="display:none;"></div>
+
+</div>
 
 <script>
-let currentRoom = null;
 
-function selectRoom(id) {
-  currentRoom = id;
-  update();
+let currentRoom=null;
+
+const fakeData={
+101:{name:'Ahmed Ali',hr:85,spo2:97,bodyTemp:36.9,humidity:55,water:70,status:'Normal'},
+102:{name:'Mohamed Hassan',hr:120,spo2:90,bodyTemp:39,humidity:65,water:40,status:'Critical'},
+103:{name:'Omar Khaled',hr:100,spo2:95,bodyTemp:37.5,humidity:58,water:60,status:'Warning'}
+};
+
+function renderHome(){
+let html=`<div class="homeGrid">`;
+
+for(let room in fakeData){
+html+=`
+<div class="homeCard" onclick="openRoom(${room})">
+<h3>Room ${room}</h3>
+<p style="color:#8aa3ba;margin-top:6px">${fakeData[room].name}</p>
+</div>`;
 }
 
-async function update() {
-  if (!currentRoom) return;
-
-  const res = await fetch('/room/' + currentRoom);
-  const d = await res.json();
-
-  if (!d) return;
-
-  let statusClass = (d.status || "Normal").toLowerCase();
-
-  document.getElementById("data").innerHTML = `
-    <div class="card">
-
-      <div class="room-title">Room ${currentRoom}</div>
-      <div class="name">${d.name}</div>
-
-      <div class="hr">${d.hr}</div>
-      <div class="bpm">BPM</div>
-
-      <div class="grid">
-        <div class="box">
-          <div class="label">SpO2</div>
-          <div class="value">${d.spo2}%</div>
-        </div>
-
-        <div class="box">
-          <div class="label">Body Temp</div>
-          <div class="value">${d.temp} °C</div>
-        </div>
-
-        <div class="box">
-          <div class="label">Humidity</div>
-          <div class="value">${d.humidity || 40}%</div>
-        </div>
-
-        <div class="box">
-          <div class="label">Water Level</div>
-          <div class="value">${d.water || 70}</div>
-        </div>
-      </div>
-
-      <div class="status ${statusClass}">
-        ${d.status}
-      </div>
-
-    </div>
-  `;
+html+=`</div>`;
+document.getElementById("homeScreen").innerHTML=html;
 }
 
-setInterval(update, 2000);
+function openRoom(id){
+currentRoom=id;
+document.getElementById("homeScreen").style.display="none";
+document.getElementById("data").style.display="block";
+update();
+}
+
+function goHome(){
+currentRoom=null;
+document.getElementById("data").style.display="none";
+document.getElementById("homeScreen").style.display="block";
+}
+
+function update(){
+
+if(!currentRoom)return;
+
+const d=fakeData[currentRoom];
+const c=d.status.toLowerCase();
+const blink=d.status==='Critical'?'blink':'';
+
+document.getElementById("data").innerHTML=`
+
+<button class="back-btn" onclick="goHome()">⬅ Back</button>
+
+<div class="grid">
+
+<div class="card">
+
+<div class="patient-name">${d.name}</div>
+<div class="sub">Room ${currentRoom} • ICU Bed Active</div>
+
+<div class="monitor">
+<div class="bigHr">${d.hr} BPM</div>
+
+<!-- ECG HEARTBEAT LINE RESTORED -->
+<svg viewBox="0 0 500 120">
+<path d="M0 70 L50 70 L80 35 L100 95 L130 20 L160 70 L220 70 L250 55 L280 70 L500 70"/>
+</svg>
+
+</div>
+
+<div class="metrics">
+<div class="metric"><div class="label">SpO₂</div><div class="val">${d.spo2}%</div></div>
+<div class="metric"><div class="label">Temp</div><div class="val">${d.bodyTemp}°C</div></div>
+<div class="metric"><div class="label">Humidity</div><div class="val">${d.humidity}%</div></div>
+<div class="metric"><div class="label">Water</div><div class="val">${d.water}%</div></div>
+</div>
+
+</div>
+
+<div>
+
+<div class="card status">
+<div class="sub">Current Alert</div>
+<h2 class="${c} ${blink}">${d.status}</h2>
+</div>
+
+<div class="card table">
+<div class="row"><span>Doctor</span><span>Assigned</span></div>
+<div class="row"><span>Nurse</span><span>On Duty</span></div>
+<div class="row"><span>Last Update</span><span>Live</span></div>
+<div class="row"><span>Bed Signal</span><span>Stable</span></div>
+</div>
+
+</div>
+
+</div>
+`;
+}
+
+renderHome();
+setInterval(update,2000);
+
 </script>
 
 </body>
