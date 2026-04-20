@@ -36,9 +36,9 @@ app.post('/login', (req, res) => {
 
 /* -------- ICU DATA -------- */
 let rooms = {
-  101: { name:'Ahmed Ali', hr:85, spo2:97, bodyTemp:36.9, humidity:55, water:70, status:'Normal' },
-  102: { name:'Mohamed Hassan', hr:120, spo2:90, bodyTemp:39, humidity:65, water:40, status:'Critical' },
-  103: { name:'Omar Khaled', hr:100, spo2:95, bodyTemp:37.5, humidity:58, water:60, status:'Warning' }
+  101: { name:'Ahmed Ali', hr:85, spo2:97, bodyTemp:36.9, humidity:55, water:70, status:'Normal', lastUpdate: Date.now() },
+  102: { name:'Mohamed Hassan', hr:120, spo2:90, bodyTemp:39, humidity:65, water:40, status:'Critical', lastUpdate: Date.now() },
+  103: { name:'Omar Khaled', hr:100, spo2:95, bodyTemp:37.5, humidity:58, water:60, status:'Warning', lastUpdate: Date.now() }
 };
 
 /* -------- TEST -------- */
@@ -53,13 +53,29 @@ app.get('/rooms', (req, res) => {
 
 /* -------- GET SINGLE ROOM -------- */
 app.get('/room/:id', (req, res) => {
-  const id = req.params.id;
+  const room = rooms[req.params.id];
 
-  if (!rooms[id]) {
+  if (!room) {
     return res.json({ message: "No data yet" });
   }
 
-  res.json(rooms[id]);
+  const now = Date.now();
+  const diff = now - room.lastUpdate;
+
+  // 🔴 If no update for 10 seconds → show "-"
+  if (diff > 10000) {
+    return res.json({
+      name: room.name,
+      hr: "-",
+      spo2: "-",
+      bodyTemp: "-",
+      humidity: "-",
+      water: "-",
+      status: "Disconnected"
+    });
+  }
+
+  res.json(room);
 });
 
 /* -------- UPDATE FROM ESP -------- */
@@ -74,7 +90,8 @@ app.post('/room/:id', (req, res) => {
     bodyTemp: d.bodyTemp ?? 0,
     humidity: d.humidity ?? 0,
     water: d.water ?? 0,
-    status: d.status || "Normal"
+    status: d.status || "Normal",
+    lastUpdate: Date.now()   // 🔥 IMPORTANT
   };
 
   console.log("UPDATED:", rooms[id]);
@@ -102,7 +119,7 @@ async function sendToGoogleSheets() {
         headers: { "Content-Type": "application/json" }
       });
 
-      console.log(`✅ Sent room ${roomId} to Google Sheets`, response.data);
+      console.log(`✅ Sent room ${roomId} to Google Sheets`);
     }
 
   } catch (err) {
