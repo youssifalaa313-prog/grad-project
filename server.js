@@ -36,12 +36,15 @@ app.post('/login', (req, res) => {
 /* -------- ICU DATA -------- */
 let rooms = {};
 
+/* -------- LAST SENT CACHE (IMPORTANT) -------- */
+let lastSentData = {};
+
 /* -------- TEST -------- */
 app.get('/', (req, res) => {
   res.send("Server working 🚀");
 });
 
-/* -------- PING (for UptimeRobot) -------- */
+/* -------- PING (for uptime) -------- */
 app.get('/ping', (req, res) => {
   res.status(200).send("OK");
 });
@@ -62,7 +65,7 @@ app.get('/room/:id', (req, res) => {
   res.json(rooms[id]);
 });
 
-/* -------- UPDATE FROM ESP + SEND TO GOOGLE SHEETS -------- */
+/* -------- UPDATE FROM ESP + SMART SEND -------- */
 app.post('/room/:id', async (req, res) => {
   const id = req.params.id;
   const d = req.body;
@@ -83,15 +86,34 @@ app.post('/room/:id', async (req, res) => {
 
   console.log("UPDATED:", newData);
 
-  // 🔥 send instantly to Google Sheets
-  try {
-    const response = await axios.post(GOOGLE_SCRIPT_URL, newData, {
-      headers: { "Content-Type": "application/json" }
-    });
+  // 🔍 check if data changed
+  const prev = lastSentData[id];
 
-    console.log(`✅ Sent room ${id} to Google Sheets`, response.data);
-  } catch (err) {
-    console.log("❌ Error sending:", err.message);
+  const isSame =
+    prev &&
+    prev.hr === newData.hr &&
+    prev.spo2 === newData.spo2 &&
+    prev.bodyTemp === newData.bodyTemp &&
+    prev.humidity === newData.humidity &&
+    prev.water === newData.water &&
+    prev.status === newData.status;
+
+  if (!isSame) {
+    try {
+      const response = await axios.post(GOOGLE_SCRIPT_URL, newData, {
+        headers: { "Content-Type": "application/json" }
+      });
+
+      console.log(`✅ Sent room ${id} to Google Sheets`, response.data);
+
+      // save last sent
+      lastSentData[id] = newData;
+
+    } catch (err) {
+      console.log("❌ Error sending:", err.message);
+    }
+  } else {
+    console.log("⏭ Skipped (same data)");
   }
 
   res.send("OK");
