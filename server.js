@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const cron = require('node-cron');
 
 const app = express();
 
@@ -35,15 +34,16 @@ app.post('/login', (req, res) => {
 });
 
 /* -------- ICU DATA -------- */
-let rooms = {
-  101: { name:'Ahmed Ali', hr:85, spo2:97, bodyTemp:36.9, humidity:55, water:70, status:'Normal', lastUpdate: Date.now() },
-  102: { name:'Mohamed Hassan', hr:120, spo2:90, bodyTemp:39, humidity:65, water:40, status:'Critical', lastUpdate: Date.now() },
-  103: { name:'Omar Khaled', hr:100, spo2:95, bodyTemp:37.5, humidity:58, water:60, status:'Warning', lastUpdate: Date.now() }
-};
+let rooms = {};
 
 /* -------- TEST -------- */
 app.get('/', (req, res) => {
   res.send("Server working 🚀");
+});
+
+/* -------- PING (for UptimeRobot) -------- */
+app.get('/ping', (req, res) => {
+  res.status(200).send("OK");
 });
 
 /* -------- GET ALL ROOMS -------- */
@@ -53,92 +53,49 @@ app.get('/rooms', (req, res) => {
 
 /* -------- GET SINGLE ROOM -------- */
 app.get('/room/:id', (req, res) => {
-  const room = rooms[req.params.id];
+  const id = req.params.id;
 
-  if (!room) {
+  if (!rooms[id]) {
     return res.json({ message: "No data yet" });
   }
 
-  const now = Date.now();
-  const diff = now - room.lastUpdate;
-
-  // 🔴 If no update for 10 seconds → show "-"
-  if (diff > 10000) {
-    return res.json({
-      name: room.name,
-      hr: "-",
-      spo2: "-",
-      bodyTemp: "-",
-      humidity: "-",
-      water: "-",
-      status: "Disconnected"
-    });
-  }
-
-  res.json(room);
+  res.json(rooms[id]);
 });
 
-/* -------- UPDATE FROM ESP -------- */
-app.post('/room/:id', (req, res) => {
+/* -------- UPDATE FROM ESP + SEND TO GOOGLE SHEETS -------- */
+app.post('/room/:id', async (req, res) => {
   const id = req.params.id;
   const d = req.body;
 
-  rooms[id] = {
+  const newData = {
+    room: id,
     name: d.name || "Unknown",
     hr: d.hr || 0,
     spo2: d.spo2 || 0,
     bodyTemp: d.bodyTemp ?? 0,
     humidity: d.humidity ?? 0,
     water: d.water ?? 0,
-    status: d.status || "Normal",
-    lastUpdate: Date.now()   // 🔥 IMPORTANT
+    status: d.status || "Normal"
   };
 
-  console.log("UPDATED:", rooms[id]);
-  res.send("OK");
-});
+  // save locally
+  rooms[id] = newData;
 
-/* -------- SEND DATA TO GOOGLE SHEETS -------- */
-async function sendToGoogleSheets() {
+  console.log("UPDATED:", newData);
+
+  // 🔥 send instantly to Google Sheets
   try {
-    for (let roomId in rooms) {
-      const r = rooms[roomId];
+    const response = await axios.post(GOOGLE_SCRIPT_URL, newData, {
+      headers: { "Content-Type": "application/json" }
+    });
 
-      const data = {
-        room: roomId,
-        name: r.name,
-        hr: r.hr,
-        spo2: r.spo2,
-        bodyTemp: r.bodyTemp,
-        humidity: r.humidity,
-        water: r.water,
-        status: r.status
-      };
-
-      const response = await axios.post(GOOGLE_SCRIPT_URL, data, {
-        headers: { "Content-Type": "application/json" }
-      });
-
-      console.log(`✅ Sent room ${roomId} to Google Sheets`);
-    }
-
+    console.log(`✅ Sent room ${id} to Google Sheets`, response.data);
   } catch (err) {
     console.log("❌ Error sending:", err.message);
   }
-}
 
-/* -------- MANUAL TEST ROUTE -------- */
-app.get('/test-send', async (req, res) => {
-  await sendToGoogleSheets();
-  res.send("✅ Sent to Google Sheets");
+  res.send("OK");
 });
-
-/* -------- CRON JOB (EVERY 6 MINUTES) -------- */
-cron.schedule("*/6 * * * *", () => {
-  console.log("⏱ Sending data to Google Sheets...");
-  sendToGoogleSheets();
-});
-
 
 /* -------- SERVER -------- */
 const PORT = process.env.PORT || 3000;
