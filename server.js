@@ -139,13 +139,14 @@ cron.schedule("*/6 * * * *", () => {
   sendToGoogleSheets();
 });
 
+/* -------- PING ROUTE -------- */
+app.get('/ping', (req, res) => {
+  res.status(200).send("OK");
+});
+
 /* -------- SERVER -------- */
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log("🚀 Server running on port " + PORT);
-  
-});
-app.get('/ping', (req, res) => {
-  res.send("OK");
 });
