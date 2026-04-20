@@ -1,8 +1,7 @@
-s<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ICU Monitor Pro</title>
 
 <style>
@@ -27,6 +26,39 @@ background:linear-gradient(135deg,#06111d,#0b1d31);
 color:var(--text);
 }
 
+/* LOGIN */
+#loginScreen{
+display:flex;
+height:100vh;
+justify-content:center;
+align-items:center;
+background:#06111d;
+}
+
+.loginBox{
+background:#0d1b2a;
+padding:30px;
+border-radius:12px;
+width:300px;
+text-align:center;
+}
+
+.loginBox input{
+width:100%;
+padding:10px;
+margin:8px 0;
+}
+
+.loginBox button{
+width:100%;
+padding:10px;
+background:#4de7ff;
+border:none;
+cursor:pointer;
+font-weight:bold;
+}
+
+/* APP */
 .wrapper{
 min-height:100vh;
 padding:20px;
@@ -95,7 +127,6 @@ gap:18px;
 }
 
 .patient-name{font-size:30px;font-weight:700}
-
 .sub{color:var(--muted)}
 
 .monitor{
@@ -108,20 +139,13 @@ border:1px solid #16324c;
 
 .bigHr{font-size:72px;color:var(--cyan);font-weight:800}
 
+svg{width:100%;height:120px;margin-top:10px;}
 
-svg{
-width:100%;
-height:120px;
-margin-top:10px;
-}
-
-/* heart rate  */
 path{
 stroke:#4de7ff;
 stroke-width:4;
 fill:none;
 stroke-dasharray:300;
-stroke-dashoffset:0;
 animation:ecg 1.5s linear infinite;
 }
 
@@ -157,16 +181,7 @@ border-radius:14px;
 .blink{animation:blink 1s infinite}
 @keyframes blink{50%{opacity:.4}}
 
-/* ACTIVITY */
-.table{margin-top:18px}
-.row{
-display:flex;
-justify-content:space-between;
-padding:12px 0;
-border-bottom:1px solid var(--line);
-}
-
-/* BACK BUTTON */
+/* BACK */
 .back-btn{
 margin-bottom:15px;
 padding:10px 15px;
@@ -177,27 +192,31 @@ background:var(--cyan);
 color:#00131c;
 font-weight:bold;
 }
-
-
-@media(max-width:900px){
-.grid{grid-template-columns:1fr}
-}
 </style>
 </head>
 
 <body>
 
-<div class="wrapper">
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="loginBox">
+    <h2 style="color:#4de7ff">ICU Login</h2>
+    <input id="user" placeholder="Username">
+    <input id="pass" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p id="error" style="color:red;"></p>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="wrapper" id="app" style="display:none;">
 
 <div class="topbar">
 <div class="title">Patient Monitoring Center</div>
 <div class="live"><span class="dot"></span>System Online</div>
 </div>
 
-<!-- HOME -->
 <div id="homeScreen" class="card"></div>
-
-<!-- PATIENT VIEW -->
 <div id="data" style="display:none;"></div>
 
 </div>
@@ -206,99 +225,115 @@ font-weight:bold;
 
 let currentRoom=null;
 
-const fakeData={
-101:{name:'Ahmed Ali',hr:85,spo2:97,bodyTemp:36.9,humidity:55,water:70,status:'Normal'},
-102:{name:'Mohamed Hassan',hr:120,spo2:90,bodyTemp:39,humidity:65,water:40,status:'Critical'},
-103:{name:'Omar Khaled',hr:100,spo2:95,bodyTemp:37.5,humidity:58,water:60,status:'Warning'}
-};
+/* LOGIN */
+async function login(){
+  const username=document.getElementById("user").value;
+  const password=document.getElementById("pass").value;
 
-function renderHome(){
-let html=`<div class="homeGrid">`;
+  const res=await fetch('/login',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({username,password})
+  });
 
-for(let room in fakeData){
-html+=`
-<div class="homeCard" onclick="openRoom(${room})">
-<h3>Room ${room}</h3>
-<p style="color:#8aa3ba;margin-top:6px">${fakeData[room].name}</p>
-</div>`;
+  const data=await res.json();
+
+  if(data.success){
+    document.getElementById("loginScreen").style.display="none";
+    document.getElementById("app").style.display="block";
+    renderHome();
+  }else{
+    document.getElementById("error").innerText="Wrong login";
+  }
 }
 
-html+=`</div>`;
-document.getElementById("homeScreen").innerHTML=html;
+/* LOAD ROOMS */
+async function renderHome(){
+  const res=await fetch('/rooms');
+  const rooms=await res.json();
+
+  let html=`<div class="homeGrid">`;
+
+  for(let room in rooms){
+    html+=`
+    <div class="homeCard" onclick="openRoom(${room})">
+      <h3>Room ${room}</h3>
+      <p style="color:#8aa3ba;margin-top:6px">${rooms[room].name}</p>
+    </div>`;
+  }
+
+  html+=`</div>`;
+  document.getElementById("homeScreen").innerHTML=html;
 }
 
+/* OPEN ROOM */
 function openRoom(id){
-currentRoom=id;
-document.getElementById("homeScreen").style.display="none";
-document.getElementById("data").style.display="block";
-update();
+  currentRoom=id;
+  document.getElementById("homeScreen").style.display="none";
+  document.getElementById("data").style.display="block";
+  update();
 }
 
+/* BACK */
 function goHome(){
-currentRoom=null;
-document.getElementById("data").style.display="none";
-document.getElementById("homeScreen").style.display="block";
+  currentRoom=null;
+  document.getElementById("data").style.display="none";
+  document.getElementById("homeScreen").style.display="block";
 }
 
-function update(){
+/* UPDATE DATA */
+async function update(){
+  if(!currentRoom) return;
 
-if(!currentRoom)return;
+  const res=await fetch('/room/'+currentRoom);
+  const d=await res.json();
 
-const d=fakeData[currentRoom];
-const c=d.status.toLowerCase();
-const blink=d.status==='Critical'?'blink':'';
+  if(d.message){
+    document.getElementById("data").innerHTML="<p>No data yet...</p>";
+    return;
+  }
 
-document.getElementById("data").innerHTML=`
+  const c=d.status.toLowerCase();
+  const blink=d.status==='Critical'?'blink':'';
 
-<button class="back-btn" onclick="goHome()">⬅ Back</button>
+  document.getElementById("data").innerHTML=`
+  <button class="back-btn" onclick="goHome()">⬅ Back</button>
 
-<div class="grid">
+  <div class="grid">
 
-<div class="card">
+  <div class="card">
 
-<div class="patient-name">${d.name}</div>
-<div class="sub">Room ${currentRoom} • ICU Bed Active</div>
+  <div class="patient-name">${d.name}</div>
+  <div class="sub">Room ${currentRoom}</div>
 
-<div class="monitor">
-<div class="bigHr">${d.hr} BPM</div>
+  <div class="monitor">
+  <div class="bigHr">${d.hr} BPM</div>
 
-<!-- ECG HEARTBEAT LINE RESTORED -->
-<svg viewBox="0 0 500 120">
-<path d="M0 70 L50 70 L80 35 L100 95 L130 20 L160 70 L220 70 L250 55 L280 70 L500 70"/>
-</svg>
+  <svg viewBox="0 0 500 120">
+  <path d="M0 70 L50 70 L80 35 L100 95 L130 20 L160 70 L220 70 L250 55 L280 70 L500 70"/>
+  </svg>
+  </div>
 
-</div>
+  <div class="metrics">
+  <div class="metric"><div class="label">SpO₂</div><div class="val">${d.spo2}%</div></div>
+  <div class="metric"><div class="label">Temp</div><div class="val">${d.bodyTemp}°C</div></div>
+  <div class="metric"><div class="label">Humidity</div><div class="val">${d.humidity}%</div></div>
+  <div class="metric"><div class="label">Water</div><div class="val">${d.water}%</div></div>
+  </div>
 
-<div class="metrics">
-<div class="metric"><div class="label">SpO₂</div><div class="val">${d.spo2}%</div></div>
-<div class="metric"><div class="label">Temp</div><div class="val">${d.bodyTemp}°C</div></div>
-<div class="metric"><div class="label">Humidity</div><div class="val">${d.humidity}%</div></div>
-<div class="metric"><div class="label">Water</div><div class="val">${d.water}%</div></div>
-</div>
+  </div>
 
-</div>
+  <div>
+  <div class="card status">
+  <div class="sub">Status</div>
+  <h2 class="${c} ${blink}">${d.status}</h2>
+  </div>
+  </div>
 
-<div>
-
-<div class="card status">
-<div class="sub">Current Alert</div>
-<h2 class="${c} ${blink}">${d.status}</h2>
-</div>
-
-<div class="card table">
-<div class="row"><span>Doctor</span><span>Assigned</span></div>
-<div class="row"><span>Nurse</span><span>On Duty</span></div>
-<div class="row"><span>Last Update</span><span>Live</span></div>
-<div class="row"><span>Bed Signal</span><span>Stable</span></div>
-</div>
-
-</div>
-
-</div>
-`;
+  </div>
+  `;
 }
 
-renderHome();
 setInterval(update,2000);
 
 </script>
