@@ -33,10 +33,14 @@ app.post('/login', (req, res) => {
   res.json({ success: false });
 });
 
-/* -------- ICU DATA -------- */
-let rooms = {};
+/* -------- ICU DATA (ALL ROOMS ALWAYS EXIST) -------- */
+let rooms = {
+  101: { name:'-', hr:0, spo2:0, bodyTemp:0, humidity:0, water:0, status:'No Data' },
+  102: { name:'-', hr:0, spo2:0, bodyTemp:0, humidity:0, water:0, status:'No Data' },
+  103: { name:'-', hr:0, spo2:0, bodyTemp:0, humidity:0, water:0, status:'No Data' }
+};
 
-/* -------- LAST SENT CACHE (IMPORTANT) -------- */
+/* -------- LAST SENT CACHE -------- */
 let lastSentData = {};
 
 /* -------- TEST -------- */
@@ -44,7 +48,7 @@ app.get('/', (req, res) => {
   res.send("Server working 🚀");
 });
 
-/* -------- PING (for uptime) -------- */
+/* -------- PING (for uptime robot) -------- */
 app.get('/ping', (req, res) => {
   res.status(200).send("OK");
 });
@@ -72,7 +76,7 @@ app.post('/room/:id', async (req, res) => {
 
   const newData = {
     room: id,
-    name: d.name || "Unknown",
+    name: d.name || "-",
     hr: d.hr || 0,
     spo2: d.spo2 || 0,
     bodyTemp: d.bodyTemp ?? 0,
@@ -81,12 +85,12 @@ app.post('/room/:id', async (req, res) => {
     status: d.status || "Normal"
   };
 
-  // save locally
+  // update only that room
   rooms[id] = newData;
 
   console.log("UPDATED:", newData);
 
-  // 🔍 check if data changed
+  // check if data changed
   const prev = lastSentData[id];
 
   const isSame =
@@ -106,7 +110,7 @@ app.post('/room/:id', async (req, res) => {
 
       console.log(`✅ Sent room ${id} to Google Sheets`, response.data);
 
-      // save last sent
+      // save last sent data
       lastSentData[id] = newData;
 
     } catch (err) {
