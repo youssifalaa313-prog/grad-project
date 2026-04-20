@@ -1,7 +1,12 @@
 const express = require('express');
 const cors = require('cors');
+const axios = require('axios');
+const cron = require('node-cron');
 
 const app = express();
+
+/* -------- GOOGLE SCRIPT URL -------- */
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTl-roTAKEH3-nqrXiYSAjVhyd2fB_lfwpyZ3V9KDgI8Ed5zbVjImKrPFI_GTyUx7r/exec";
 
 /* -------- MIDDLEWARE -------- */
 app.use(cors());
@@ -74,6 +79,41 @@ app.post('/room/:id', (req, res) => {
 
   console.log("UPDATED:", rooms[id]);
   res.send("OK");
+});
+
+/* -------- SEND DATA TO GOOGLE SHEETS -------- */
+async function sendToGoogleSheets() {
+  try {
+    for (let roomId in rooms) {
+      const r = rooms[roomId];
+
+      const data = {
+        room: roomId,
+        name: r.name,
+        hr: r.hr,
+        spo2: r.spo2,
+        bodyTemp: r.bodyTemp,
+        humidity: r.humidity,
+        water: r.water,
+        status: r.status
+      };
+
+      await axios.post(GOOGLE_SCRIPT_URL, data, {
+        headers: { "Content-Type": "application/json" }
+      });
+
+      console.log(`✅ Sent room ${roomId} to Google Sheets`);
+    }
+
+  } catch (err) {
+    console.log("❌ Error sending:", err.message);
+  }
+}
+
+/* -------- CRON JOB (EVERY 6 MINUTES) -------- */
+cron.schedule("*/6 * * * *", () => {
+  console.log("⏱ Sending data to Google Sheets...");
+  sendToGoogleSheets();
 });
 
 /* -------- SERVER -------- */
