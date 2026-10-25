@@ -2,1258 +2,549 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ICU Patient Monitoring Center</title>
-
-  <style>
-    :root {
-      --red: #c62835;
-      --red-dark: #a51e2a;
-      --red-light: #fff0f1;
-      --white: #ffffff;
-      --background: #f7f8fa;
-      --text: #252a34;
-      --muted: #727987;
-      --border: #e8e9ed;
-      --green: #218653;
-      --orange: #d98216;
-      --shadow: 0 8px 28px rgba(25, 30, 45, 0.07);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: var(--background);
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
-    button, input {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* LOGIN */
-
-    .login-page {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      background:
-        radial-gradient(circle at top right, #ffe0e3 0, transparent 35%),
-        var(--background);
-    }
-
-    .login-card {
-      width: 100%;
-      max-width: 420px;
-      padding: 38px;
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      background: var(--white);
-      box-shadow: var(--shadow);
-    }
-
-    .brand-mark {
-      display: flex;
-      width: 62px;
-      height: 62px;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 24px;
-      border-radius: 18px;
-      background: var(--red-light);
-      color: var(--red);
-      font-size: 30px;
-      font-weight: 800;
-    }
-
-    .login-card h1 {
-      margin: 0 0 9px;
-      font-size: 27px;
-      letter-spacing: -0.8px;
-    }
-
-    .subtitle {
-      margin: 0 0 28px;
-      color: var(--muted);
-      line-height: 1.6;
-      font-size: 14px;
-    }
-
-    .field {
-      margin-bottom: 18px;
-    }
-
-    .field label {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .field input {
-      width: 100%;
-      padding: 13px 14px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      outline: none;
-      background: #fff;
-      color: var(--text);
-    }
-
-    .field input:focus {
-      border-color: var(--red);
-      box-shadow: 0 0 0 3px rgba(198, 40, 53, 0.09);
-    }
-
-    .password-wrap {
-      display: flex;
-      gap: 8px;
-    }
-
-    .password-wrap input {
-      min-width: 0;
-      flex: 1;
-    }
-
-    .show-password {
-      padding: 0 12px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: white;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .primary-button {
-      width: 100%;
-      padding: 14px 18px;
-      border: none;
-      border-radius: 10px;
-      background: var(--red);
-      color: white;
-      font-weight: 700;
-      transition: background 0.2s, transform 0.2s;
-    }
-
-    .primary-button:hover {
-      background: var(--red-dark);
-    }
-
-    .primary-button:active {
-      transform: scale(0.99);
-    }
-
-    .message {
-      margin-top: 14px;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .error-message {
-      color: var(--red);
-    }
-
-    .success-message {
-      color: var(--green);
-    }
-
-    .login-footer {
-      margin-top: 25px;
-      padding-top: 18px;
-      border-top: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 12px;
-      text-align: center;
-    }
-
-    /* APPLICATION HEADER */
-
-    .app-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 18px 5%;
-      border-bottom: 1px solid var(--border);
-      background: var(--white);
-    }
-
-    .header-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .header-icon {
-      display: flex;
-      width: 43px;
-      height: 43px;
-      align-items: center;
-      justify-content: center;
-      border-radius: 13px;
-      background: var(--red-light);
-      color: var(--red);
-      font-size: 22px;
-      font-weight: 800;
-    }
-
-    .header-brand h2 {
-      margin: 0;
-      font-size: 16px;
-    }
-
-    .header-brand p {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .connection-label {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .connection-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--green);
-    }
-
-    .connection-dot.offline {
-      background: var(--red);
-    }
-
-    .secondary-button {
-      padding: 10px 14px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      background: white;
-      color: var(--text);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .secondary-button:hover {
-      border-color: var(--red);
-      color: var(--red);
-    }
-
-    /* MAIN CONTENT */
-
-    .main-content {
-      width: min(1120px, 92%);
-      margin: 0 auto;
-      padding: 35px 0 55px;
-    }
-
-    .page-heading {
-      margin-bottom: 25px;
-    }
-
-    .eyebrow {
-      margin-bottom: 9px;
-      color: var(--red);
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
-
-    .page-heading h1 {
-      margin: 0 0 9px;
-      font-size: clamp(25px, 4vw, 34px);
-      letter-spacing: -1px;
-    }
-
-    .page-heading p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    /* ROOM CARD */
-
-    .room-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 330px));
-      gap: 20px;
-    }
-
-    .room-card {
-      padding: 24px;
-      border: 1px solid var(--border);
-      border-radius: 17px;
-      background: var(--white);
-      box-shadow: var(--shadow);
-      cursor: pointer;
-      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
-    }
-
-    .room-card:hover {
-      transform: translateY(-3px);
-      border-color: #efadb2;
-      box-shadow: 0 12px 32px rgba(25, 30, 45, 0.1);
-    }
-
-    .room-card-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 23px;
-    }
-
-    .room-icon {
-      display: flex;
-      width: 52px;
-      height: 52px;
-      align-items: center;
-      justify-content: center;
-      border-radius: 15px;
-      background: var(--red-light);
-      color: var(--red);
-      font-size: 25px;
-    }
-
-    .room-tag {
-      padding: 7px 10px;
-      border-radius: 20px;
-      background: #f0f8f3;
-      color: var(--green);
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .room-card h3 {
-      margin: 0 0 7px;
-      font-size: 22px;
-    }
-
-    .room-card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .room-card-bottom {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 25px;
-      padding-top: 17px;
-      border-top: 1px solid var(--border);
-      color: var(--red);
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    /* PATIENT DASHBOARD */
-
-    .back-button {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      margin-bottom: 22px;
-      padding: 0;
-      border: none;
-      background: transparent;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .back-button:hover {
-      color: var(--red);
-    }
-
-    .patient-banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      margin-bottom: 24px;
-      padding: 25px;
-      border: 1px solid #f3d7d9;
-      border-radius: 17px;
-      background: linear-gradient(115deg, #fff 35%, #fff0f1);
-    }
-
-    .patient-banner h1 {
-      margin: 0 0 8px;
-      font-size: clamp(23px, 4vw, 30px);
-    }
-
-    .patient-banner p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .patient-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 14px;
-      padding: 8px 11px;
-      border-radius: 8px;
-      background: #f1f3f5;
-      color: #596170;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .patient-status.normal {
-      background: #eaf7ef;
-      color: var(--green);
-    }
-
-    .patient-status.warning {
-      background: #fff4e5;
-      color: #a65f00;
-    }
-
-    .patient-status.critical {
-      background: #fff0f1;
-      color: var(--red);
-    }
-
-    .patient-symbol {
-      display: flex;
-      width: 70px;
-      height: 70px;
-      flex-shrink: 0;
-      align-items: center;
-      justify-content: center;
-      border-radius: 20px;
-      background: white;
-      color: var(--red);
-      font-size: 36px;
-    }
-
-    .section-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-      margin: 30px 0 16px;
-    }
-
-    .section-heading h2 {
-      margin: 0;
-      font-size: 19px;
-    }
-
-    .section-heading span {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .vitals-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .metric-card {
-      min-width: 0;
-      padding: 22px;
-      border: 1px solid var(--border);
-      border-radius: 15px;
-      background: white;
-      box-shadow: 0 4px 18px rgba(25, 30, 45, 0.035);
-    }
-
-    .metric-top {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-      margin-bottom: 22px;
-    }
-
-    .metric-icon {
-      display: flex;
-      width: 42px;
-      height: 42px;
-      flex-shrink: 0;
-      align-items: center;
-      justify-content: center;
-      border-radius: 12px;
-      background: var(--red-light);
-      color: var(--red);
-      font-size: 20px;
-    }
-
-    .metric-label {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.4;
-    }
-
-    .metric-value-row {
-      display: flex;
-      align-items: baseline;
-      gap: 7px;
-      flex-wrap: wrap;
-    }
-
-    .metric-value {
-      overflow-wrap: anywhere;
-      color: var(--text);
-      font-size: clamp(25px, 3vw, 34px);
-      font-weight: 800;
-      letter-spacing: -1px;
-    }
-
-    .metric-unit {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .metric-note {
-      margin-top: 11px;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.5;
-    }
-
-    .metric-card.status-metric .metric-value {
-      font-size: clamp(18px, 2vw, 24px);
-      letter-spacing: -0.3px;
-    }
-
-    .last-updated {
-      margin-top: 25px;
-      padding: 15px 17px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: white;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.6;
-    }
-
-    .last-updated strong {
-      color: var(--text);
-    }
-
-    .app-footer {
-      padding: 20px;
-      border-top: 1px solid var(--border);
-      background: white;
-      color: var(--muted);
-      font-size: 11px;
-      text-align: center;
-    }
-
-    @media (max-width: 760px) {
-      .vitals-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .metric-card {
-        padding: 17px;
-      }
-
-      .patient-banner {
-        padding: 20px;
-      }
-    }
-
-    @media (max-width: 520px) {
-      .login-card {
-        padding: 27px 22px;
-      }
-
-      .app-header {
-        padding: 15px 4%;
-      }
-
-      .header-brand h2 {
-        font-size: 13px;
-      }
-
-      .header-brand p {
-        font-size: 11px;
-      }
-
-      .connection-label {
-        display: none;
-      }
-
-      .main-content {
-        width: 92%;
-        padding-top: 27px;
-      }
-
-      .vitals-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-
-      .metric-card {
-        padding: 14px;
-      }
-
-      .metric-top {
-        align-items: flex-start;
-        gap: 8px;
-        margin-bottom: 17px;
-      }
-
-      .metric-icon {
-        width: 34px;
-        height: 34px;
-        border-radius: 10px;
-        font-size: 17px;
-      }
-
-      .metric-label {
-        font-size: 11px;
-      }
-
-      .metric-value {
-        font-size: 25px;
-      }
-
-      .patient-symbol {
-        width: 53px;
-        height: 53px;
-        border-radius: 15px;
-        font-size: 28px;
-      }
-
-      .room-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ICU Patient Monitoring Center</title>
+<style>
+:root {
+  --red:#c62835;
+  --red-dark:#a51e2a;
+  --red-light:#fff0f1;
+  --bg:#f7f8fa;
+  --text:#252a34;
+  --muted:#727987;
+  --border:#e8e9ed;
+  --green:#218653;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+}
+button,input { font:inherit; }
+button { cursor:pointer; }
+.hidden { display:none!important; }
+
+.login-page {
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:radial-gradient(circle at top right,#ffe0e3,transparent 35%),var(--bg);
+}
+.login-card {
+  width:100%;
+  max-width:420px;
+  padding:35px;
+  border:1px solid var(--border);
+  border-radius:22px;
+  background:#fff;
+  box-shadow:0 8px 28px #191e2d12;
+}
+.brand-mark,.header-icon {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--red-light);
+  color:var(--red);
+  font-weight:800;
+}
+.brand-mark {
+  width:60px;height:60px;border-radius:17px;
+  font-size:30px;margin-bottom:22px;
+}
+h1 { letter-spacing:-.7px; }
+.login-card h1 { margin:0 0 8px;font-size:28px; }
+.subtitle { color:var(--muted);font-size:14px;line-height:1.6;margin-bottom:26px; }
+.field { margin-bottom:17px; }
+.field label { display:block;font-size:13px;font-weight:bold;margin-bottom:8px; }
+.field input {
+  width:100%;padding:13px;border:1px solid var(--border);
+  border-radius:10px;outline:none;
+}
+.field input:focus { border-color:var(--red); }
+.password-wrap { display:flex;gap:8px; }
+.password-wrap input { flex:1;min-width:0; }
+.show-password,.secondary-button {
+  padding:10px 13px;border:1px solid var(--border);
+  border-radius:9px;background:white;color:var(--text);
+}
+.primary-button {
+  width:100%;padding:14px;border:0;border-radius:10px;
+  background:var(--red);color:white;font-weight:bold;
+}
+.primary-button:hover { background:var(--red-dark); }
+.message { font-size:13px;line-height:1.5; }
+.error-message { color:var(--red); }
+.login-footer { border-top:1px solid var(--border);padding-top:17px;margin-top:23px;text-align:center;color:var(--muted);font-size:12px; }
+
+.app-header {
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:17px 5%;background:white;border-bottom:1px solid var(--border);
+}
+.header-brand,.header-actions { display:flex;align-items:center;gap:12px; }
+.header-icon { width:43px;height:43px;border-radius:12px;font-size:23px; }
+.header-brand h2 { margin:0;font-size:16px; }
+.header-brand p { margin:4px 0 0;color:var(--muted);font-size:12px; }
+.connection-label { display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted); }
+.connection-dot { width:8px;height:8px;border-radius:50%;background:var(--green); }
+.connection-dot.offline { background:var(--red); }
+
+.main-content { width:min(1120px,92%);margin:auto;padding:34px 0 55px; }
+.eyebrow { color:var(--red);font-size:11px;font-weight:bold;letter-spacing:1.4px;text-transform:uppercase;margin-bottom:9px; }
+.page-heading { margin-bottom:25px; }
+.page-heading h1 { margin:0 0 9px;font-size:clamp(26px,4vw,34px); }
+.page-heading p { margin:0;color:var(--muted);font-size:14px;line-height:1.6; }
+.room-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,330px));gap:20px; }
+.room-card {
+  padding:24px;border:1px solid var(--border);border-radius:17px;
+  background:white;box-shadow:0 8px 28px #191e2d0b;cursor:pointer;
+}
+.room-card:hover { border-color:#efadb2; }
+.room-top { display:flex;justify-content:space-between;align-items:center;margin-bottom:22px; }
+.room-icon { display:flex;width:50px;height:50px;align-items:center;justify-content:center;border-radius:14px;background:var(--red-light);color:var(--red);font-size:25px; }
+.room-tag { padding:7px 10px;border-radius:20px;background:#edf8f0;color:var(--green);font-size:11px;font-weight:bold; }
+.room-card h3 { margin:0 0 8px;font-size:22px; }
+.room-card p { color:var(--muted);font-size:13px; }
+.room-bottom { border-top:1px solid var(--border);padding-top:16px;margin-top:23px;color:var(--red);font-size:13px;font-weight:bold; }
+
+.back-button { border:0;background:none;color:var(--muted);font-weight:bold;margin-bottom:22px;padding:0; }
+.patient-banner {
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  padding:25px;border:1px solid #f3d7d9;border-radius:17px;
+  background:linear-gradient(115deg,#fff 35%,#fff0f1);
+}
+.patient-banner h1 { margin:0 0 8px;font-size:clamp(24px,4vw,30px); }
+.patient-banner p { margin:0;color:var(--muted);font-size:13px; }
+.patient-symbol { display:flex;align-items:center;justify-content:center;width:65px;height:65px;flex-shrink:0;border-radius:18px;background:white;color:var(--red);font-size:35px; }
+.patient-status { display:inline-flex;gap:8px;margin-top:14px;padding:8px 11px;border-radius:8px;background:#f0f1f3;color:#626b78;font-size:12px;font-weight:bold; }
+.patient-status.normal { background:#eaf7ef;color:var(--green); }
+.patient-status.warning { background:#fff4e5;color:#a65f00; }
+.patient-status.critical { background:#fff0f1;color:var(--red); }
+
+.section-heading { display:flex;justify-content:space-between;align-items:center;gap:12px;margin:30px 0 16px; }
+.section-heading h2 { margin:0;font-size:19px; }
+.section-heading span { color:var(--muted);font-size:12px; }
+.vitals-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px; }
+.metric-card { min-width:0;padding:21px;border:1px solid var(--border);border-radius:15px;background:white; }
+.metric-top { display:flex;align-items:center;gap:11px;margin-bottom:20px; }
+.metric-icon { display:flex;align-items:center;justify-content:center;width:40px;height:40px;flex-shrink:0;border-radius:12px;background:var(--red-light);color:var(--red);font-size:20px; }
+.metric-label { color:var(--muted);font-size:12px;line-height:1.4; }
+.metric-value-row { display:flex;align-items:baseline;gap:7px;flex-wrap:wrap; }
+.metric-value { overflow-wrap:anywhere;font-size:clamp(25px,3vw,34px);font-weight:800;letter-spacing:-1px; }
+.metric-unit { color:var(--muted);font-size:12px; }
+.metric-note { margin-top:11px;color:var(--muted);font-size:11px;line-height:1.5; }
+.status-metric .metric-value { font-size:clamp(17px,2vw,23px);letter-spacing:-.3px; }
+.last-updated { margin-top:24px;padding:15px 17px;border:1px solid var(--border);border-radius:12px;background:white;color:var(--muted);font-size:12px;line-height:1.7; }
+.last-updated strong { color:var(--text); }
+.app-footer { padding:20px;border-top:1px solid var(--border);background:white;color:var(--muted);font-size:11px;text-align:center; }
+
+@media(max-width:760px) {
+  .vitals-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .metric-card { padding:16px; }
+}
+@media(max-width:520px) {
+  .login-card { padding:27px 22px; }
+  .app-header { padding:14px 4%; }
+  .header-brand h2 { font-size:13px; }
+  .header-brand p,.connection-label { font-size:11px; }
+  .connection-label { display:none; }
+  .main-content { padding-top:26px; }
+  .metric-card { padding:13px; }
+  .metric-top { gap:8px;align-items:flex-start; }
+  .metric-icon { width:33px;height:33px;font-size:17px; }
+  .metric-label { font-size:11px; }
+  .metric-value { font-size:24px; }
+}
+</style>
 </head>
-
 <body>
-  <!-- LOGIN PAGE -->
-  <section id="loginPage" class="login-page">
-    <div class="login-card">
-      <div class="brand-mark">+</div>
 
-      <h1>Welcome back</h1>
-      <p class="subtitle">
-        ICU Patient Monitoring Center<br>
-        Sign in to access patient monitoring.
-      </p>
+<section id="loginPage" class="login-page">
+  <div class="login-card">
+    <div class="brand-mark">+</div>
+    <h1>Welcome back</h1>
+    <p class="subtitle">ICU Patient Monitoring Center<br>Sign in to access patient monitoring.</p>
 
-      <form id="loginForm">
-        <div class="field">
-          <label for="username">Username</label>
-          <input
-            id="username"
-            name="username"
-            type="text"
-            placeholder="Enter your username"
-            autocomplete="username"
-            required
-          >
-        </div>
-
-        <div class="field">
-          <label for="password">Password</label>
-          <div class="password-wrap">
-            <input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Enter your password"
-              autocomplete="current-password"
-              required
-            >
-            <button
-              id="togglePassword"
-              class="show-password"
-              type="button"
-            >Show</button>
-          </div>
-        </div>
-
-        <button id="loginButton" class="primary-button" type="submit">
-          Sign In
-        </button>
-
-        <p id="loginMessage" class="message" role="status"></p>
-      </form>
-
-      <div class="login-footer">
-        Authorized personnel only
+    <form id="loginForm">
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" autocomplete="username" required>
       </div>
-    </div>
-  </section>
-
-  <!-- APPLICATION -->
-  <div id="appPage" class="hidden">
-    <header class="app-header">
-      <div class="header-brand">
-        <div class="header-icon">+</div>
-        <div>
-          <h2>ICU Monitoring Center</h2>
-          <p>Patient Monitoring System</p>
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="password-wrap">
+          <input id="password" type="password" autocomplete="current-password" required>
+          <button class="show-password" id="togglePassword" type="button">Show</button>
         </div>
       </div>
-
-      <div class="header-actions">
-        <div class="connection-label">
-          <span id="connectionDot" class="connection-dot"></span>
-          <span id="connectionText">Connecting...</span>
-        </div>
-
-        <button id="logoutButton" class="secondary-button" type="button">
-          Log out
-        </button>
-      </div>
-    </header>
-
-    <main class="main-content">
-      <!-- ROOM SELECTION -->
-      <section id="roomsPage">
-        <div class="page-heading">
-          <div class="eyebrow">Monitoring overview</div>
-          <h1>Patient Rooms</h1>
-          <p>Select a room to view the patient's latest readings.</p>
-        </div>
-
-        <div id="roomsContainer" class="room-grid">
-          <p>Loading Room 207...</p>
-        </div>
-      </section>
-
-      <!-- PATIENT DASHBOARD -->
-      <section id="patientPage" class="hidden">
-        <button id="backButton" class="back-button" type="button">
-          ← Back to rooms
-        </button>
-
-        <div class="patient-banner">
-          <div>
-            <div class="eyebrow">Patient overview</div>
-            <h1>Room 207</h1>
-            <p id="patientName">Patient monitoring dashboard</p>
-
-            <div id="patientStatus" class="patient-status">
-              <span>●</span>
-              <span id="patientStatusText">Awaiting data</span>
-            </div>
-          </div>
-
-          <div class="patient-symbol">+</div>
-        </div>
-
-        <div class="section-heading">
-          <h2>Patient Vitals</h2>
-          <span>Live monitoring</span>
-        </div>
-
-        <div class="vitals-grid">
-          <!-- 1. HEART RATE -->
-          <article class="metric-card">
-            <div class="metric-top">
-              <div class="metric-icon">♥</div>
-              <div class="metric-label">Heart Rate</div>
-            </div>
-            <div class="metric-value-row">
-              <span id="heartRate" class="metric-value">—</span>
-              <span class="metric-unit">BPM</span>
-            </div>
-            <div class="metric-note">Beats per minute</div>
-          </article>
-
-          <!-- 2. SPO2 -->
-          <article class="metric-card">
-            <div class="metric-top">
-              <div class="metric-icon">◉</div>
-              <div class="metric-label">Blood Oxygen</div>
-            </div>
-            <div class="metric-value-row">
-              <span id="spo2" class="metric-value">—</span>
-              <span class="metric-unit">%</span>
-            </div>
-            <div class="metric-note">SpO₂ oxygen saturation</div>
-          </article>
-
-          <!-- 3. BODY TEMPERATURE -->
-          <article class="metric-card">
-            <div class="metric-top">
-              <div class="metric-icon">♨</div>
-              <div class="metric-label">Body Temperature</div>
-            </div>
-            <div class="metric-value-row">
-              <span id="bodyTemp" class="metric-value">—</span>
-              <span class="metric-unit">°C</span>
-            </div>
-            <div class="metric-note">Measured body temperature</div>
-          </article>
-
-          <!-- 4. ECG STATUS -->
-          <article class="metric-card status-metric">
-            <div class="metric-top">
-              <div class="metric-icon">⌁</div>
-              <div class="metric-label">ECG Status</div>
-            </div>
-            <div class="metric-value-row">
-              <span id="ecgStatus" class="metric-value">Awaiting data</span>
-            </div>
-            <div class="metric-note">Rhythm classification from the data source</div>
-          </article>
-
-          <!-- 5. MOTION -->
-          <article class="metric-card status-metric">
-            <div class="metric-top">
-              <div class="metric-icon">↔</div>
-              <div class="metric-label">Motion</div>
-            </div>
-            <div class="metric-value-row">
-              <span id="motionStatus" class="metric-value">Awaiting data</span>
-            </div>
-            <div class="metric-note">Patient movement status</div>
-          </article>
-
-          <!-- 6. WATER LEVEL -->
-          <article class="metric-card">
-            <div class="metric-top">
-              <div class="metric-icon">♧</div>
-              <div class="metric-label">Water Level</div>
-            </div>
-            <div class="metric-value-row">
-              <span id="waterLevel" class="metric-value">—</span>
-              <span class="metric-unit">%</span>
-            </div>
-            <div class="metric-note">Water sensor reading</div>
-          </article>
-        </div>
-
-        <div class="last-updated">
-          <strong>Last update:</strong>
-          <span id="lastUpdated">Waiting for patient data...</span>
-          <br>
-          <span id="dataMessage">
-            Readings will appear when the server receives data from the device.
-          </span>
-        </div>
-      </section>
-    </main>
-
-    <footer class="app-footer">
-      ICU Patient Monitoring Center · Room 207
-    </footer>
+      <button class="primary-button" id="loginButton" type="submit">Sign In</button>
+      <p id="loginMessage" class="message" role="status"></p>
+    </form>
+    <div class="login-footer">Authorized personnel only</div>
   </div>
+</section>
 
-  <script>
-    /* -------- ELEMENTS -------- */
-    const loginPage = document.getElementById("loginPage");
-    const appPage = document.getElementById("appPage");
-    const loginForm = document.getElementById("loginForm");
-    const loginButton = document.getElementById("loginButton");
-    const loginMessage = document.getElementById("loginMessage");
-    const passwordInput = document.getElementById("password");
-    const togglePassword = document.getElementById("togglePassword");
+<div id="appPage" class="hidden">
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="header-icon">+</div>
+      <div><h2>ICU Monitoring Center</h2><p>Patient Monitoring System</p></div>
+    </div>
+    <div class="header-actions">
+      <div class="connection-label">
+        <span id="connectionDot" class="connection-dot offline"></span>
+        <span id="connectionText">Disconnected</span>
+      </div>
+      <button class="secondary-button" id="logoutButton">Log out</button>
+    </div>
+  </header>
 
-    const roomsPage = document.getElementById("roomsPage");
-    const patientPage = document.getElementById("patientPage");
-    const roomsContainer = document.getElementById("roomsContainer");
+  <main class="main-content">
+    <section id="roomsPage">
+      <div class="page-heading">
+        <div class="eyebrow">Monitoring overview</div>
+        <h1>Patient Rooms</h1>
+        <p>Select a room to view the patient's latest readings.</p>
+      </div>
+      <div id="roomsContainer" class="room-grid">Loading Room 207...</div>
+    </section>
 
-    const connectionDot = document.getElementById("connectionDot");
-    const connectionText = document.getElementById("connectionText");
+    <section id="patientPage" class="hidden">
+      <button id="backButton" class="back-button">← Back to rooms</button>
 
-    let currentRoom = null;
-    let refreshTimer = null;
-    let requestInProgress = false;
+      <div class="patient-banner">
+        <div>
+          <div class="eyebrow">Patient overview</div>
+          <h1>Room 207</h1>
+          <p id="patientName">Patient monitoring dashboard</p>
+          <div id="patientStatus" class="patient-status">
+            <span>●</span><span id="patientStatusText">Awaiting data</span>
+          </div>
+        </div>
+        <div class="patient-symbol">+</div>
+      </div>
 
-    /* -------- LOGIN -------- */
-    loginForm.addEventListener("submit", async function (event) {
-      event.preventDefault();
+      <div class="section-heading"><h2>Patient Vitals</h2><span>Live updates</span></div>
 
-      loginMessage.textContent = "";
-      loginMessage.className = "message";
-      loginButton.disabled = true;
-      loginButton.textContent = "Signing in...";
+      <div class="vitals-grid">
+        <article class="metric-card">
+          <div class="metric-top"><div class="metric-icon">♥</div><div class="metric-label">Heart Rate</div></div>
+          <div class="metric-value-row"><span id="heartRate" class="metric-value">—</span><span class="metric-unit">BPM</span></div>
+          <div class="metric-note">Beats per minute</div>
+        </article>
 
-      try {
-        const response = await fetch("/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            username: document.getElementById("username").value.trim(),
-            password: passwordInput.value
-          })
-        });
+        <article class="metric-card">
+          <div class="metric-top"><div class="metric-icon">◉</div><div class="metric-label">Blood Oxygen</div></div>
+          <div class="metric-value-row"><span id="spo2" class="metric-value">—</span><span class="metric-unit">%</span></div>
+          <div class="metric-note">SpO₂ oxygen saturation</div>
+        </article>
 
-        if (!response.ok) {
-          throw new Error("Login request failed");
-        }
+        <article class="metric-card">
+          <div class="metric-top"><div class="metric-icon">♨</div><div class="metric-label">Body Temperature</div></div>
+          <div class="metric-value-row"><span id="bodyTemp" class="metric-value">—</span><span class="metric-unit">°C</span></div>
+          <div class="metric-note">Measured body temperature</div>
+        </article>
 
-        const result = await response.json();
+        <article class="metric-card status-metric">
+          <div class="metric-top"><div class="metric-icon">⌁</div><div class="metric-label">ECG Status</div></div>
+          <div class="metric-value-row"><span id="ecgStatus" class="metric-value">Awaiting data</span></div>
+          <div class="metric-note">Rhythm classification from the data source</div>
+        </article>
 
-        if (result.success) {
-          loginPage.classList.add("hidden");
-          appPage.classList.remove("hidden");
-          loginForm.reset();
-          showRooms();
-          loadRooms();
-        } else {
-          loginMessage.textContent = "Incorrect username or password.";
-          loginMessage.classList.add("error-message");
-        }
-      } catch (error) {
-        console.error("Login error:", error);
-        loginMessage.textContent =
-          "Unable to connect to the server. Please try again.";
-        loginMessage.classList.add("error-message");
-      } finally {
-        loginButton.disabled = false;
-        loginButton.textContent = "Sign In";
-      }
+        <article class="metric-card status-metric">
+          <div class="metric-top"><div class="metric-icon">↔</div><div class="metric-label">Motion</div></div>
+          <div class="metric-value-row"><span id="motionStatus" class="metric-value">Awaiting data</span></div>
+          <div class="metric-note">Camera movement detection</div>
+        </article>
+
+        <article class="metric-card">
+          <div class="metric-top"><div class="metric-icon">♧</div><div class="metric-label">Water Level</div></div>
+          <div class="metric-value-row"><span id="waterLevel" class="metric-value">—</span><span class="metric-unit">%</span></div>
+          <div class="metric-note">Water sensor reading</div>
+        </article>
+      </div>
+
+      <div class="last-updated">
+        <strong>Last update:</strong> <span id="lastUpdated">Waiting for data...</span><br>
+        <span id="dataMessage">Waiting for the server.</span>
+      </div>
+    </section>
+  </main>
+  <footer class="app-footer">ICU Patient Monitoring Center · Room 207</footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let currentRoom = null;
+let eventSource = null;
+let fallbackTimer = null;
+let requestInProgress = false;
+
+$('togglePassword').addEventListener('click', () => {
+  const show = $('password').type === 'password';
+  $('password').type = show ? 'text' : 'password';
+  $('togglePassword').textContent = show ? 'Hide' : 'Show';
+});
+
+$('loginForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  $('loginButton').disabled = true;
+  $('loginButton').textContent = 'Signing in...';
+  $('loginMessage').textContent = '';
+
+  try {
+    const response = await fetch('/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: $('username').value.trim(),
+        password: $('password').value
+      })
     });
 
-    /* -------- SHOW / HIDE PASSWORD -------- */
-    togglePassword.addEventListener("click", function () {
-      const isPassword = passwordInput.type === "password";
-      passwordInput.type = isPassword ? "text" : "password";
-      togglePassword.textContent = isPassword ? "Hide" : "Show";
-    });
+    const result = await response.json();
 
-    /* -------- LOGOUT -------- */
-    document.getElementById("logoutButton").addEventListener("click", function () {
-      stopPolling();
-
-      currentRoom = null;
-      appPage.classList.add("hidden");
-      loginPage.classList.remove("hidden");
-
-      loginMessage.textContent = "";
-      loginMessage.className = "message";
-      document.getElementById("username").value = "";
-      passwordInput.value = "";
-      passwordInput.type = "password";
-      togglePassword.textContent = "Show";
-    });
-
-    /* -------- SHOW ROOM SELECTION -------- */
-    function showRooms() {
-      stopPolling();
-      currentRoom = null;
-      patientPage.classList.add("hidden");
-      roomsPage.classList.remove("hidden");
-      connectionText.textContent = "Connecting...";
-      connectionDot.classList.remove("offline");
+    if (!response.ok || !result.success) {
+      $('loginMessage').textContent = 'Incorrect username or password.';
+      $('loginMessage').className = 'message error-message';
+      return;
     }
 
-    /* -------- LOAD ROOM 207 ONLY -------- */
-    async function loadRooms() {
-      roomsContainer.innerHTML = "";
+    $('loginPage').classList.add('hidden');
+    $('appPage').classList.remove('hidden');
+    $('loginForm').reset();
+    await loadRooms();
+  } catch (error) {
+    $('loginMessage').textContent = 'Unable to connect to the server.';
+    $('loginMessage').className = 'message error-message';
+  } finally {
+    $('loginButton').disabled = false;
+    $('loginButton').textContent = 'Sign In';
+  }
+});
 
-      try {
-        const response = await fetch("/rooms", {
-          cache: "no-store"
-        });
+$('logoutButton').addEventListener('click', () => {
+  stopLiveUpdates();
+  currentRoom = null;
+  $('appPage').classList.add('hidden');
+  $('loginPage').classList.remove('hidden');
+  $('loginMessage').textContent = '';
+});
 
-        if (!response.ok) {
-          throw new Error("Failed to load rooms");
-        }
+$('backButton').addEventListener('click', () => {
+  stopLiveUpdates();
+  currentRoom = null;
+  $('patientPage').classList.add('hidden');
+  $('roomsPage').classList.remove('hidden');
+});
 
-        const rooms = await response.json();
+async function loadRooms() {
+  const container = $('roomsContainer');
+  container.textContent = 'Loading Room 207...';
 
-        // The server returns an object keyed by room ID.
-        const room207 = rooms["207"];
+  try {
+    const response = await fetch('/rooms', { cache: 'no-store' });
+    if (!response.ok) throw new Error('Room request failed');
 
-        if (!room207) {
-          roomsContainer.innerHTML =
-            '<p class="error-message">Room 207 was not found on the server.</p>';
-          return;
-        }
-
-        const card = document.createElement("div");
-        card.className = "room-card";
-        card.setAttribute("role", "button");
-        card.setAttribute("tabindex", "0");
-
-        card.innerHTML = `
-          <div class="room-card-top">
-            <div class="room-icon">+</div>
-            <span class="room-tag">Monitoring enabled</span>
-          </div>
-          <h3>Room 207</h3>
-          <p>ICU Patient Monitoring</p>
-          <div class="room-card-bottom">
-            <span>View patient dashboard</span>
-            <span>→</span>
-          </div>
-        `;
-
-        card.addEventListener("click", function () {
-          openRoom("207");
-        });
-
-        card.addEventListener("keydown", function (event) {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            openRoom("207");
-          }
-        });
-
-        roomsContainer.appendChild(card);
-      } catch (error) {
-        console.error("Room loading error:", error);
-        roomsContainer.innerHTML =
-          '<p class="error-message">Unable to load Room 207. Check your server connection.</p>';
-      }
+    const rooms = await response.json();
+    if (!rooms['207']) {
+      container.innerHTML = '<p class="error-message">Room 207 was not found.</p>';
+      return;
     }
 
-    /* -------- OPEN ROOM -------- */
-    function openRoom(roomId) {
-      if (String(roomId) !== "207") {
-        return;
-      }
+    const card = document.createElement('div');
+    card.className = 'room-card';
+    card.tabIndex = 0;
+    card.setAttribute('role', 'button');
+    card.innerHTML = `
+      <div class="room-top">
+        <div class="room-icon">+</div>
+        <span class="room-tag">Room available</span>
+      </div>
+      <h3>Room 207</h3>
+      <p>ICU Patient Monitoring</p>
+      <div class="room-bottom">View patient dashboard →</div>
+    `;
 
-      currentRoom = "207";
-      roomsPage.classList.add("hidden");
-      patientPage.classList.remove("hidden");
+    card.addEventListener('click', () => openRoom('207'));
+    card.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') openRoom('207');
+    });
 
+    container.replaceChildren(card);
+  } catch (error) {
+    container.innerHTML = '<p class="error-message">Unable to load Room 207.</p>';
+  }
+}
+
+function openRoom(id) {
+  if (id !== '207') return;
+
+  currentRoom = id;
+  $('roomsPage').classList.add('hidden');
+  $('patientPage').classList.remove('hidden');
+
+  updatePatientData();
+  startLiveUpdates();
+}
+
+function startLiveUpdates() {
+  stopLiveUpdates();
+
+  // Preferred method: server pushes data when readings change.
+  eventSource = new EventSource('/events');
+
+  eventSource.onopen = () => setConnection(true);
+
+  eventSource.onmessage = event => {
+    try {
+      const data = JSON.parse(event.data);
+      if (currentRoom === '207') renderPatientData(data);
+      setConnection(true);
+    } catch (error) {
+      console.error('Invalid live update:', error);
+    }
+  };
+
+  eventSource.onerror = () => {
+    setConnection(false);
+
+    // Fall back to 500 ms polling if SSE disconnects.
+    if (!fallbackTimer) {
+      fallbackTimer = setInterval(updatePatientData, 500);
       updatePatientData();
-      startPolling();
     }
+  };
+}
 
-    /* -------- BACK TO ROOMS -------- */
-    document.getElementById("backButton").addEventListener("click", function () {
-      showRooms();
-      loadRooms();
-    });
+function stopLiveUpdates() {
+  if (eventSource) {
+    eventSource.close();
+    eventSource = null;
+  }
 
-    /* -------- LIVE DATA POLLING -------- */
-    function startPolling() {
-      stopPolling();
+  if (fallbackTimer) {
+    clearInterval(fallbackTimer);
+    fallbackTimer = null;
+  }
 
-      refreshTimer = setInterval(function () {
-        updatePatientData();
-      }, 2000);
-    }
+  requestInProgress = false;
+}
 
-    function stopPolling() {
-      if (refreshTimer !== null) {
-        clearInterval(refreshTimer);
-        refreshTimer = null;
-      }
+async function updatePatientData() {
+  if (currentRoom !== '207' || requestInProgress) return;
 
-      requestInProgress = false;
-    }
+  requestInProgress = true;
 
-    /* -------- UPDATE PATIENT DATA -------- */
-    async function updatePatientData() {
-      if (currentRoom !== "207" || requestInProgress) {
-        return;
-      }
+  try {
+    const response = await fetch('/room/207', { cache: 'no-store' });
+    if (!response.ok) throw new Error('Could not get readings');
 
-      requestInProgress = true;
+    const data = await response.json();
+    if (currentRoom !== '207') return;
 
-      try {
-        const response = await fetch("/room/207", {
-          cache: "no-store"
-        });
+    renderPatientData(data);
+    setConnection(true);
+  } catch (error) {
+    setConnection(false);
+    $('dataMessage').textContent = 'Connection problem. Retrying automatically.';
+  } finally {
+    requestInProgress = false;
+  }
+}
 
-        if (!response.ok) {
-          throw new Error("Failed to retrieve patient data");
-        }
+function renderPatientData(data) {
+  $('patientName').textContent =
+    data.name && data.name !== '-' ? data.name : 'Patient in Room 207';
 
-        const data = await response.json();
+  setMetric('heartRate', data.hr);
+  setMetric('spo2', data.spo2);
+  setMetric('bodyTemp', data.bodyTemp, true);
+  setMetric('waterLevel', data.water);
 
-        if (currentRoom !== "207") {
-          return;
-        }
+  $('ecgStatus').textContent = formatValue(
+    data.ecgStatus ?? data.ecg_status ?? data.rhythm ?? data.ecg
+  );
 
-        if (data.message === "No data yet") {
-          throw new Error("No patient data is available yet");
-        }
+  $('motionStatus').textContent = formatMotion(
+    data.motion ?? data.motionStatus ?? data.motion_status
+  );
 
-        setConnectionStatus(true);
-        renderPatientData(data);
+  const status = String(data.status ?? 'Awaiting data');
+  $('patientStatusText').textContent = status;
 
-        document.getElementById("lastUpdated").textContent =
-          new Date().toLocaleTimeString();
+  const statusElement = $('patientStatus');
+  statusElement.classList.remove('normal', 'warning', 'critical');
 
-        document.getElementById("dataMessage").textContent =
-          "Dashboard connected to the server. Values reflect the latest received data.";
-      } catch (error) {
-        console.error("Patient data error:", error);
-        setConnectionStatus(false);
+  const normalized = status.toLowerCase();
 
-        document.getElementById("dataMessage").textContent =
-          "Unable to retrieve the latest readings. The dashboard will retry automatically.";
-      } finally {
-        requestInProgress = false;
-      }
-    }
+  if (normalized.includes('critical') || normalized.includes('emergency')) {
+    statusElement.classList.add('critical');
+  } else if (normalized.includes('warning') || normalized.includes('abnormal')) {
+    statusElement.classList.add('warning');
+  } else if (normalized === 'normal' || normalized === 'stable') {
+    statusElement.classList.add('normal');
+  }
 
-    /* -------- RENDER VITALS -------- */
-    function renderPatientData(data) {
-      document.getElementById("patientName").textContent =
-        data.name && data.name !== "-" ? data.name : "Patient in Room 207";
+  $('lastUpdated').textContent = new Date().toLocaleTimeString();
+  $('dataMessage').textContent = 'Live connection active; updates appear when the server receives new readings.';
+}
 
-      setMetric("heartRate", data.hr);
-      setMetric("spo2", data.spo2);
-      setMetric("bodyTemp", data.bodyTemp);
-      setMetric("waterLevel", data.water);
+function setMetric(id, value, decimal = false) {
+  const element = $(id);
 
-      const ecg =
-        data.ecgStatus ??
-        data.ecg_status ??
-        data.rhythm ??
-        data.ecg;
+  if (value === null || value === undefined || value === '' ||
+      !Number.isFinite(Number(value)) || Number(value) === 0) {
+    element.textContent = '—';
+    return;
+  }
 
-      document.getElementById("ecgStatus").textContent =
-        formatStatusValue(ecg);
+  element.textContent = decimal ? Number(value).toFixed(1) : String(value);
+}
 
-      const motion =
-        data.motion ??
-        data.motionStatus ??
-        data.motion_status;
+function formatValue(value) {
+  if (value === null || value === undefined || value === '' || value === 0) {
+    return 'Awaiting data';
+  }
 
-      document.getElementById("motionStatus").textContent =
-        formatMotionValue(motion);
+  if (typeof value === 'object') {
+    return value.classification ?? value.status ?? value.rhythm ?? 'Awaiting data';
+  }
 
-      const status = data.status || "Awaiting data";
-      const patientStatus = document.getElementById("patientStatus");
+  return String(value);
+}
 
-      document.getElementById("patientStatusText").textContent = status;
+function formatMotion(value) {
+  if (value === null || value === undefined || value === '') {
+    return 'Awaiting data';
+  }
 
-      patientStatus.classList.remove("normal", "warning", "critical");
+  if (typeof value === 'boolean') return value ? 'Motion detected' : 'No motion';
+  if (typeof value === 'number') return value === 0 ? 'No motion' : 'Motion detected';
 
-      const normalizedStatus = String(status).toLowerCase();
+  const text = String(value).trim().toLowerCase();
 
-      if (
-        normalizedStatus.includes("critical") ||
-        normalizedStatus.includes("emergency")
-      ) {
-        patientStatus.classList.add("critical");
-      } else if (
-        normalizedStatus.includes("warning") ||
-        normalizedStatus.includes("abnormal")
-      ) {
-        patientStatus.classList.add("warning");
-      } else if (
-        normalizedStatus === "normal" ||
-        normalizedStatus === "stable"
-      ) {
-        patientStatus.classList.add("normal");
-      }
-    }
+  if (['true', 'yes', '1', 'detected', 'moving', 'motion detected'].includes(text)) {
+    return 'Motion detected';
+  }
 
-    /* -------- FORMAT NUMERIC READINGS -------- */
-    function setMetric(elementId, value) {
-      const element = document.getElementById(elementId);
+  if (['false', 'no', '0', 'none', 'still', 'no motion'].includes(text)) {
+    return 'No motion';
+  }
 
-      if (
-        value === null ||
-        value === undefined ||
-        value === "" ||
-        !Number.isFinite(Number(value))
-      ) {
-        element.textContent = "—";
-        return;
-      }
+  return String(value);
+}
 
-      const number = Number(value);
-
-      // Zero often means the sensor has not received a valid reading yet.
-      if (number === 0) {
-        element.textContent = "—";
-        return;
-      }
-
-      element.textContent =
-        elementId === "bodyTemp" ? number.toFixed(1) : String(number);
-    }
-
-    /* -------- FORMAT ECG STATUS -------- */
-    function formatStatusValue(value) {
-      if (
-        value === null ||
-        value === undefined ||
-        value === "" ||
-        value === 0
-      ) {
-        return "Awaiting data";
-      }
-
-      if (typeof value === "object") {
-        return value.classification ||
-          value.status ||
-          value.rhythm ||
-          "Awaiting data";
-      }
-
-      return String(value);
-    }
-
-    /* -------- FORMAT MOTION -------- */
-    function formatMotionValue(value) {
-      if (
-        value === null ||
-        value === undefined ||
-        value === ""
-      ) {
-        return "Awaiting data";
-      }
-
-      if (typeof value === "boolean") {
-        return value ? "Motion detected" : "No motion";
-      }
-
-      if (typeof value === "number") {
-        return value === 0 ? "No motion" : "Motion detected";
-      }
-
-      const normalized = String(value).trim().toLowerCase();
-
-      if (["true", "yes", "1", "detected", "moving", "motion detected"].includes(normalized)) {
-        return "Motion detected";
-      }
-
-      if (["false", "no", "0", "none", "still", "no motion"].includes(normalized)) {
-        return "No motion";
-      }
-
-      return String(value);
-    }
-
-    /* -------- CONNECTION STATUS -------- */
-    function setConnectionStatus(isOnline) {
-      connectionDot.classList.toggle("offline", !isOnline);
-      connectionText.textContent = isOnline ? "Connected" : "Connection issue";
-    }
-  </script>
+function setConnection(online) {
+  $('connectionDot').classList.toggle('offline', !online);
+  $('connectionText').textContent = online ? 'Connected' : 'Reconnecting...';
+}
+</script>
 </body>
 </html>
