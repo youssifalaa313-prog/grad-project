@@ -130,7 +130,7 @@ button {
   font-size: 17px;
 }
 
-.loginBox button[type="button"] {
+.loginBox .loginButton {
   width: 100%;
   min-height: 48px;
   margin-top: 4px;
@@ -142,7 +142,7 @@ button {
   font-weight: 700;
 }
 
-.loginBox button[type="button"]:hover {
+.loginBox .loginButton:hover {
   background: var(--red-dark);
   box-shadow: 0 5px 15px rgba(198, 40, 40, .18);
 }
@@ -200,10 +200,12 @@ button {
 }
 
 @keyframes pulse {
-  50% { box-shadow: 0 0 0 7px rgba(32, 164, 100, .08); }
+  50% {
+    box-shadow: 0 0 0 7px rgba(32, 164, 100, .08);
+  }
 }
 
-/* HOME / ROOM SELECTION */
+/* ROOM SELECTION */
 
 .card {
   background: var(--panel);
@@ -229,6 +231,7 @@ button {
   padding: 22px;
   cursor: pointer;
   transition: .22s ease;
+  outline: none;
 }
 
 .homeCard::before {
@@ -242,7 +245,8 @@ button {
   opacity: .65;
 }
 
-.homeCard:hover {
+.homeCard:hover,
+.homeCard:focus-visible {
   transform: translateY(-3px);
   border-color: #e7aaaa;
   background: #fff8f8;
@@ -274,6 +278,7 @@ button {
   font-weight: 750;
   letter-spacing: -.5px;
   margin-bottom: 6px;
+  overflow-wrap: anywhere;
 }
 
 .sub {
@@ -406,17 +411,9 @@ path {
   overflow-wrap: anywhere;
 }
 
-.normal {
-  color: var(--green);
-}
-
-.warning {
-  color: var(--yellow);
-}
-
-.critical {
-  color: var(--red);
-}
+.normal { color: var(--green); }
+.warning { color: var(--yellow); }
+.critical { color: var(--red); }
 
 .blink {
   animation: blink 1s infinite;
@@ -447,7 +444,7 @@ path {
   border-color: #e4a4a4;
 }
 
-/* EMPTY DATA MESSAGE */
+/* EMPTY STATES */
 
 .emptyState {
   padding: 30px 22px;
@@ -468,30 +465,22 @@ path {
   margin-bottom: 10px;
 }
 
-/* RESPONSIVE LAYOUT */
+/* RESPONSIVE */
 
 @media (max-width: 800px) {
-  .wrapper {
-    padding: 16px;
-  }
+  .wrapper { padding: 16px; }
 
   .grid {
     grid-template-columns: 1fr;
   }
 
-  .title {
-    font-size: 21px;
-  }
+  .title { font-size: 21px; }
 
-  .card {
-    padding: 18px;
-  }
+  .card { padding: 18px; }
 }
 
 @media (max-width: 520px) {
-  .wrapper {
-    padding: 12px;
-  }
+  .wrapper { padding: 12px; }
 
   .topbar {
     padding: 16px;
@@ -500,49 +489,25 @@ path {
     gap: 12px;
   }
 
-  .title {
-    font-size: 20px;
-  }
+  .title { font-size: 20px; }
+  .live { font-size: 13px; }
 
-  .live {
-    font-size: 13px;
-  }
+  .loginBox { padding: 30px 22px; }
 
-  .loginBox {
-    padding: 30px 22px;
-  }
-
-  .homeGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .metrics {
-    gap: 10px;
-  }
-
-  .metric {
-    padding: 14px;
-  }
-
-  .monitor {
-    padding: 16px;
-  }
-
-  .patient-name {
-    font-size: 25px;
-  }
-
-  svg {
-    height: 100px;
-  }
+  .homeGrid { grid-template-columns: 1fr; }
+  .metrics { gap: 10px; }
+  .metric { padding: 14px; }
+  .monitor { padding: 16px; }
+  .patient-name { font-size: 25px; }
+  svg { height: 100px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
     transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 </style>
@@ -576,27 +541,28 @@ path {
           autocomplete="current-password"
           required
         >
+
         <button
           type="button"
           class="passwordToggle"
           id="passwordToggle"
-          onclick="togglePassword()"
           aria-label="Show password"
           title="Show or hide password"
         >◉</button>
       </div>
 
-      <button type="button" onclick="login()">Login</button>
+      <button type="submit" class="loginButton">Login</button>
       <p id="error" role="alert" aria-live="polite"></p>
     </form>
   </div>
 </div>
 
-<!-- APP -->
+<!-- APPLICATION -->
 <div class="wrapper" id="app" style="display:none;">
 
   <div class="topbar">
     <div class="title">Patient Monitoring Center</div>
+
     <div class="live">
       <span class="dot"></span>
       System Online
@@ -609,7 +575,10 @@ path {
 </div>
 
 <script>
+"use strict";
+
 let currentRoom = null;
+let refreshTimer = null;
 
 /* SHOW / HIDE PASSWORD */
 function togglePassword() {
@@ -624,13 +593,27 @@ function togglePassword() {
   );
 }
 
+document.getElementById("passwordToggle").addEventListener(
+  "click",
+  togglePassword
+);
+
 /* LOGIN */
 async function login() {
-  const username = document.getElementById("user").value;
+  const username = document.getElementById("user").value.trim();
   const password = document.getElementById("pass").value;
   const error = document.getElementById("error");
+  const button = document.querySelector(".loginButton");
 
-  error.innerText = "";
+  error.textContent = "";
+
+  if (!username || !password) {
+    error.textContent = "Enter your username and password.";
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Signing in...";
 
   try {
     const res = await fetch("/login", {
@@ -639,25 +622,45 @@ async function login() {
       body: JSON.stringify({ username, password })
     });
 
-    const data = await res.json();
+    const result = await res.json();
 
-    if (data.success) {
-      document.getElementById("loginScreen").style.display = "none";
-      document.getElementById("app").style.display = "block";
-      await renderHome();
-    } else {
-      error.innerText = "Incorrect username or password.";
+    if (!res.ok || !result.success) {
+      error.textContent = "Incorrect username or password.";
+      return;
     }
+
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+
+    await renderHome();
+
+    if (refreshTimer) clearInterval(refreshTimer);
+    refreshTimer = setInterval(update, 2000);
+
   } catch (err) {
-    error.innerText = "Unable to connect. Please try again.";
+    console.error("Login error:", err);
+    error.textContent = "Unable to connect to the server.";
+  } finally {
+    button.disabled = false;
+    button.textContent = "Login";
   }
 }
 
-/* ALLOW ENTER TO LOG IN */
-document.getElementById("loginForm").addEventListener("submit", function(e) {
-  e.preventDefault();
+document.getElementById("loginForm").addEventListener("submit", (event) => {
+  event.preventDefault();
   login();
 });
+
+/* ESCAPE SERVER VALUES BEFORE DISPLAYING THEM AS HTML */
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
 
 /* LOAD ROOMS */
 async function renderHome() {
@@ -667,89 +670,155 @@ async function renderHome() {
   try {
     const res = await fetch("/rooms");
 
-    if (!res.ok) throw new Error("Could not load rooms");
+    if (!res.ok) {
+      throw new Error("Could not load rooms: HTTP " + res.status);
+    }
 
     const rooms = await res.json();
-    let html = '<div class="homeGrid">';
 
-    for (let room in rooms) {
-      html += `
-        <div class="homeCard" onclick="openRoom(${JSON.stringify(String(room))})" role="button" tabindex="0"
-          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRoom(${JSON.stringify(String(room))})}">
-          <h3>Room ${room}</h3>
-          <p>${rooms[room].name ?? "Patient room"}</p>
+    if (!rooms || typeof rooms !== "object" || Array.isArray(rooms)) {
+      throw new Error("Invalid rooms response");
+    }
+
+    const roomIds = Object.keys(rooms);
+
+    if (roomIds.length === 0) {
+      home.innerHTML = `
+        <div class="emptyState">
+          <div class="emptyIcon">✚</div>
+          <h3>No rooms available</h3>
+          <p>The server returned no rooms.</p>
         </div>`;
+      return;
     }
 
-    html += "</div>";
+    const grid = document.createElement("div");
+    grid.className = "homeGrid";
 
-    if (Object.keys(rooms).length === 0) {
-      html = '<div class="emptyState"><div class="emptyIcon">✚</div><h3>No rooms available</h3><p>There are currently no rooms to display.</p></div>';
+    for (const roomId of roomIds) {
+      const room = rooms[roomId];
+      const card = document.createElement("div");
+
+      card.className = "homeCard";
+      card.dataset.room = roomId;
+      card.setAttribute("role", "button");
+      card.setAttribute("tabindex", "0");
+
+      const heading = document.createElement("h3");
+      heading.textContent = "Room " + roomId;
+
+      const description = document.createElement("p");
+      description.textContent = room?.name ?? "Patient room";
+
+      card.append(heading, description);
+
+      // Attach the room ID directly instead of generating inline JavaScript.
+      card.addEventListener("click", () => openRoom(roomId));
+
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openRoom(roomId);
+        }
+      });
+
+      grid.appendChild(card);
     }
 
-    home.innerHTML = html;
+    home.replaceChildren(grid);
+
   } catch (err) {
+    console.error("Room loading error:", err);
+
     home.innerHTML = `
       <div class="emptyState">
         <h3>Unable to load rooms</h3>
-        <p>Please check the server connection and try again.</p>
+        <p>Check the server connection and try again.</p>
         <br>
-        <button class="back-btn" onclick="renderHome()">Retry</button>
+        <button class="back-btn" id="retryRooms">Retry</button>
       </div>`;
+
+    document.getElementById("retryRooms").addEventListener("click", renderHome);
   }
 }
 
 /* OPEN ROOM */
 function openRoom(id) {
-  currentRoom = id;
+  currentRoom = String(id);
+
   document.getElementById("homeScreen").style.display = "none";
-  document.getElementById("data").style.display = "block";
+
+  const container = document.getElementById("data");
+  container.style.display = "block";
+  container.innerHTML = `
+    <button class="back-btn" id="backButton">← Back</button>
+    <div class="emptyState">
+      <h3>Loading patient data...</h3>
+    </div>`;
+
+  document.getElementById("backButton").addEventListener("click", goHome);
+
   update();
 }
 
 /* BACK TO HOME */
 function goHome() {
   currentRoom = null;
+
   document.getElementById("data").style.display = "none";
   document.getElementById("homeScreen").style.display = "block";
 }
 
 /* UPDATE PATIENT DATA */
 async function update() {
-  if (!currentRoom) return;
+  if (currentRoom === null) return;
+
+  const requestedRoom = currentRoom;
 
   try {
-    const res = await fetch("/room/" + encodeURIComponent(currentRoom));
+    const res = await fetch(
+      "/room/" + encodeURIComponent(requestedRoom)
+    );
 
-    if (!res.ok) throw new Error("Could not load patient data");
+    if (!res.ok) {
+      throw new Error("Patient request failed: HTTP " + res.status);
+    }
 
     const d = await res.json();
-    const container = document.getElementById("data");
 
-    if (!currentRoom) return;
+    // Ignore responses belonging to a room that is no longer selected.
+    if (currentRoom !== requestedRoom) return;
+
+    const container = document.getElementById("data");
 
     if (d.message) {
       container.innerHTML = `
-        <button class="back-btn" onclick="goHome()">← Back</button>
+        <button class="back-btn" id="backButton">← Back</button>
         <div class="emptyState">
           <div class="emptyIcon">♡</div>
           <h3>No patient data yet</h3>
           <p>Waiting for monitoring data from this room.</p>
         </div>`;
+
+      document.getElementById("backButton").addEventListener("click", goHome);
       return;
     }
 
     const status = String(d.status ?? "No Data");
-    const c = status.toLowerCase();
-    const blink = status === "Critical" ? "blink" : "";
+    const statusClass = status.toLowerCase();
+    const validStatusClass = ["normal", "warning", "critical"].includes(statusClass)
+      ? statusClass
+      : "";
+
+    const blink = statusClass === "critical" ? "blink" : "";
 
     container.innerHTML = `
-      <button class="back-btn" onclick="goHome()">← Back</button>
+      <button class="back-btn" id="backButton">← Back</button>
 
       <div class="grid">
         <div class="card">
-          <div class="patient-name">${d.name ?? "Patient"}</div>
-          <div class="sub">Room ${currentRoom}</div>
+          <div class="patient-name">${escapeHTML(d.name ?? "Patient")}</div>
+          <div class="sub">Room ${escapeHTML(requestedRoom)}</div>
 
           <div class="monitor">
             <div class="monitorHeader">
@@ -757,9 +826,12 @@ async function update() {
               <div class="liveTag"><span>●</span> Patient vitals</div>
             </div>
 
-            <div class="bigHr">${d.hr ?? "--"} <span>BPM</span></div>
+            <div class="bigHr">
+              ${escapeHTML(d.hr ?? "--")} <span>BPM</span>
+            </div>
 
-            <svg viewBox="0 0 500 120" role="img" aria-label="Decorative ECG waveform">
+            <svg viewBox="0 0 500 120" role="img"
+                 aria-label="Decorative ECG waveform">
               <path d="M0 70 L50 70 L80 35 L100 95 L130 20 L160 70 L220 70 L250 55 L280 70 L500 70"/>
             </svg>
           </div>
@@ -767,48 +839,53 @@ async function update() {
           <div class="metrics">
             <div class="metric">
               <div class="label">SpO₂</div>
-              <div class="val">${d.spo2 ?? "--"}${d.spo2 == null ? "" : "%"}</div>
+              <div class="val">${escapeHTML(d.spo2 ?? "--")}${d.spo2 == null ? "" : "%"}</div>
             </div>
 
             <div class="metric">
               <div class="label">Body Temperature</div>
-              <div class="val">${d.bodyTemp ?? "--"}${d.bodyTemp == null ? "" : "°C"}</div>
+              <div class="val">${escapeHTML(d.bodyTemp ?? "--")}${d.bodyTemp == null ? "" : "°C"}</div>
             </div>
 
             <div class="metric">
               <div class="label">Humidity</div>
-              <div class="val">${d.humidity ?? "--"}${d.humidity == null ? "" : "%"}</div>
+              <div class="val">${escapeHTML(d.humidity ?? "--")}${d.humidity == null ? "" : "%"}</div>
             </div>
 
             <div class="metric">
               <div class="label">Water Level</div>
-              <div class="val">${d.water ?? "--"}${d.water == null ? "" : "%"}</div>
+              <div class="val">${escapeHTML(d.water ?? "--")}${d.water == null ? "" : "%"}</div>
             </div>
           </div>
         </div>
 
         <div class="card status">
           <div class="sub">Patient Status</div>
-          <h2 class="${["normal", "warning", "critical"].includes(c) ? c : ""} ${blink}">
-            ${status}
+          <h2 class="${validStatusClass} ${blink}">
+            ${escapeHTML(status)}
           </h2>
         </div>
-      </div>
-    `;
-  } catch (err) {
-    if (!currentRoom) return;
+      </div>`;
 
-    document.getElementById("data").innerHTML = `
-      <button class="back-btn" onclick="goHome()">← Back</button>
+    document.getElementById("backButton").addEventListener("click", goHome);
+
+  } catch (err) {
+    if (currentRoom !== requestedRoom) return;
+
+    console.error("Patient data error:", err);
+
+    const container = document.getElementById("data");
+
+    container.innerHTML = `
+      <button class="back-btn" id="backButton">← Back</button>
       <div class="emptyState">
         <h3>Unable to load patient data</h3>
         <p>Checking the connection again shortly...</p>
       </div>`;
+
+    document.getElementById("backButton").addEventListener("click", goHome);
   }
 }
-
-/* REFRESH EVERY 2 SECONDS */
-setInterval(update, 2000);
 </script>
 
 </body>
