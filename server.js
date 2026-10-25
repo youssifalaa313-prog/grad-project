@@ -6,50 +6,49 @@ const path = require('path');
 
 const app = express();
 
-/* -------- GOOGLE SCRIPT URL -------- */
+/* -------- GOOGLE SHEETS -------- */
 const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycby1aXuNqebDLmBdQLOpK4G9o2K9EVnnAyOxyP4BkaGp5Tg5kO-t1DWBDGguw3NOaOKZ/exec";
+  'https://script.google.com/macros/s/AKfycby1aXuNqebDLmBdQLOpK4G9o2K9EVnnAyOxyP4BkaGp5Tg5kO-t1DWBDGguw3NOaOKZ/exec';
 
 /* -------- MIDDLEWARE -------- */
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static(__dirname));
 
-/* -------- USERS (LOGIN) -------- */
+/* -------- LOGIN USERS -------- */
 const users = {
-  "youssifhouty313": "houty313",
-  "beshir21": "beshir21",
-  "malakhamed4": "micky123",
-  "hanashrar1": "shrara123",
-  "farahayman3": "farah123",
-  "razanokasha6": "okasha123"
+  'youssifhouty313': 'houty313',
+  'beshir21': 'beshir21',
+  'malakhamed4': 'micky123',
+  'hanashrar1': 'shrara123',
+  'farahayman3': 'farah123',
+  'razanokasha6': 'okasha123'
 };
 
-/* -------- ONLY ROOM 207 -------- */
+/* -------- ROOM 207 ONLY -------- */
 const rooms = {
-  "207": {
-    id: "207",
-    room: "207",
-    name: "-",
+  '207': {
+    id: '207',
+    room: '207',
+    name: '-',
     hr: null,
     spo2: null,
     bodyTemp: null,
     water: null,
-    ecgStatus: "Awaiting data",
-    motion: "Awaiting data",
-    status: "No Data"
+    ecgStatus: 'Awaiting data',
+    motion: 'Awaiting data',
+    status: 'No Data'
   }
 };
 
-/* -------- LAST DATA SENT TO GOOGLE SHEETS -------- */
 let lastSentData = null;
 
-/* -------- HOME: SERVE WEBSITE -------- */
+/* -------- HOME -------- */
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-/* -------- HEALTH CHECK -------- */
+/* -------- SERVER HEALTH -------- */
 app.get('/ping', (req, res) => {
   res.status(200).send('OK');
 });
@@ -70,17 +69,17 @@ app.post('/login', (req, res) => {
   return res.status(401).json({ success: false });
 });
 
-/* -------- GET ALL ROOMS: ROOM 207 ONLY -------- */
+/* -------- GET ALL ROOMS -------- */
 app.get('/rooms', (req, res) => {
   res.set('Cache-Control', 'no-store');
-  return res.json(rooms);
+  res.json(rooms);
 });
 
 /* -------- GET ROOM 207 -------- */
 app.get('/room/:id', (req, res) => {
   if (req.params.id !== '207') {
     return res.status(404).json({
-      message: 'Room not found. Only Room 207 is available.'
+      message: 'Only Room 207 is available'
     });
   }
 
@@ -88,51 +87,77 @@ app.get('/room/:id', (req, res) => {
   return res.json(rooms['207']);
 });
 
-/* -------- UPDATE ROOM 207 FROM ESP32 -------- */
+/* -------- UPDATE MOTION FROM ESP32-CAM -------- */
+app.post('/room/207/motion', (req, res) => {
+  const motion = req.body?.motion;
+
+  if (typeof motion !== 'boolean') {
+    return res.status(400).json({
+      success: false,
+      message: 'Send motion as true or false'
+    });
+  }
+
+  rooms['207'].motion = motion
+    ? 'Motion detected'
+    : 'No motion';
+
+  console.log(
+    `[Room 207] Camera: ${rooms['207'].motion}`
+  );
+
+  return res.json({
+    success: true,
+    room: '207',
+    motion: motion,
+    motionStatus: rooms['207'].motion
+  });
+});
+
+/* -------- UPDATE PATIENT READINGS FROM ESP32 -------- */
 app.post('/room/:id', async (req, res) => {
   if (req.params.id !== '207') {
     return res.status(404).json({
       success: false,
-      message: 'Only Room 207 is available.'
+      message: 'Only Room 207 is available'
     });
   }
 
   const d = req.body || {};
+  const old = rooms['207'];
 
-  // Accept both the original and alternative field names.
+  // Preserve fields that the sending device does not include.
   const newData = {
     id: '207',
     room: '207',
-    name: d.name ?? rooms['207'].name ?? '-',
-    hr: d.hr ?? null,
-    spo2: d.spo2 ?? null,
-    bodyTemp: d.bodyTemp ?? null,
-    water: d.water ?? null,
+    name: d.name ?? old.name,
+    hr: d.hr ?? old.hr,
+    spo2: d.spo2 ?? old.spo2,
+    bodyTemp: d.bodyTemp ?? old.bodyTemp,
+    water: d.water ?? old.water,
     ecgStatus:
       d.ecgStatus ??
       d.ecg_status ??
       d.rhythm ??
       d.ecg ??
-      'Awaiting data',
+      old.ecgStatus,
     motion:
       d.motion ??
       d.motionStatus ??
       d.motion_status ??
-      'Awaiting data',
-    status: d.status ?? 'Normal'
+      old.motion,
+    status: d.status ?? old.status
   };
 
-  // Update the live data returned to the dashboard.
-  Object.assign(rooms['207'], newData);
+  Object.assign(old, newData);
 
-  console.log('Updated Room 207:', newData);
+  console.log('[Room 207] Patient readings updated');
 
-  // Compare data before sending it to Google Sheets.
-  const isSame =
-    lastSentData !== null &&
-    JSON.stringify(lastSentData) === JSON.stringify(newData);
+  // Send changed readings to Google Sheets.
+  const snapshot = JSON.stringify(newData);
+  const unchanged = lastSentData === snapshot;
 
-  if (!isSame) {
+  if (!unchanged) {
     try {
       const response = await axios.post(
         GOOGLE_SCRIPT_URL,
@@ -146,40 +171,38 @@ app.post('/room/:id', async (req, res) => {
       );
 
       console.log('Google Sheets response:', response.data);
-
-      // Cache only after a successful request.
-      lastSentData = { ...newData };
+      lastSentData = snapshot;
     } catch (error) {
       console.error(
-        'Google Sheets send failed:',
+        'Google Sheets error:',
         error.response?.data || error.message
       );
     }
   } else {
-    console.log('Google Sheets: unchanged data, skipped.');
+    console.log('Google Sheets: unchanged readings skipped');
   }
 
-  // The dashboard can still use readings if Sheets is unavailable.
   return res.status(200).send('OK');
 });
 
-/* -------- HANDLE INVALID JSON -------- */
+/* -------- INVALID JSON HANDLER -------- */
 app.use((err, req, res, next) => {
-  if (err) {
-    console.error('Request error:', err.message);
-    return res.status(400).json({
-      success: false,
-      message: 'Invalid request data.'
-    });
+  console.error('Request error:', err.message);
+
+  if (res.headersSent) {
+    return next(err);
   }
 
-  next();
+  return res.status(400).json({
+    success: false,
+    message: 'Invalid request data'
+  });
 });
 
 /* -------- START SERVER -------- */
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`ICU Monitoring Server running on port ${PORT}`);
+  console.log(`ICU server running on port ${PORT}`);
   console.log('Configured room: 207 only');
 });
