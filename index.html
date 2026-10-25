@@ -11,7 +11,6 @@
 :root {
   --bg: #f6f7fb;
   --panel: #ffffff;
-  --panel2: #fff5f5;
   --line: #eadfe1;
   --red: #c62828;
   --red-dark: #a51f27;
@@ -103,7 +102,6 @@ button {
   outline: none;
   background: #fff;
   color: var(--text);
-  transition: border-color .2s, box-shadow .2s;
 }
 
 .loginBox input:focus {
@@ -122,15 +120,15 @@ button {
 .passwordToggle {
   position: absolute;
   right: 12px;
-  top: 15px;
+  top: 13px;
   border: none;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  font-size: 17px;
+  padding: 4px;
 }
 
-.loginBox .loginButton {
+.loginButton {
   width: 100%;
   min-height: 48px;
   margin-top: 4px;
@@ -142,17 +140,22 @@ button {
   font-weight: 700;
 }
 
-.loginBox .loginButton:hover {
+.loginButton:hover {
   background: var(--red-dark);
-  box-shadow: 0 5px 15px rgba(198, 40, 40, .18);
+}
+
+.loginButton:disabled {
+  opacity: .7;
+  cursor: wait;
 }
 
 #error {
   margin-top: 14px;
   font-size: 13px;
+  color: var(--red);
 }
 
-/* APPLICATION */
+/* APPLICATION HEADER */
 
 .wrapper {
   min-height: 100vh;
@@ -200,12 +203,10 @@ button {
 }
 
 @keyframes pulse {
-  50% {
-    box-shadow: 0 0 0 7px rgba(32, 164, 100, .08);
-  }
+  50% { box-shadow: 0 0 0 7px rgba(32, 164, 100, .08); }
 }
 
-/* ROOM SELECTION */
+/* GENERAL CARDS */
 
 .card {
   background: var(--panel);
@@ -215,6 +216,8 @@ button {
   margin-bottom: 20px;
   box-shadow: var(--shadow);
 }
+
+/* ROOM SELECTION */
 
 .homeGrid {
   display: grid;
@@ -230,8 +233,8 @@ button {
   border-radius: 15px;
   padding: 22px;
   cursor: pointer;
-  transition: .22s ease;
   outline: none;
+  transition: .22s ease;
 }
 
 .homeCard::before {
@@ -255,7 +258,6 @@ button {
 
 .homeCard h3 {
   font-size: 19px;
-  color: var(--text);
   margin-bottom: 9px;
 }
 
@@ -264,9 +266,9 @@ button {
   font-size: 14px;
 }
 
-/* PATIENT DASHBOARD */
+/* PATIENT INFORMATION */
 
-.grid {
+.patientGrid {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
   gap: 20px;
@@ -286,24 +288,25 @@ button {
   font-size: 15px;
 }
 
-.monitor {
+/* HEART RATE */
+
+.heartCard {
   margin-top: 22px;
   padding: 24px;
   border-radius: 16px;
   background: #fffafa;
   border: 1px solid #f0dada;
-  overflow: hidden;
 }
 
-.monitorHeader {
+.heartHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 15px;
 }
 
-.monitorLabel {
+.heartLabel {
   color: var(--muted);
   font-size: 14px;
   font-weight: 600;
@@ -322,7 +325,7 @@ button {
 }
 
 .bigHr {
-  font-size: clamp(42px, 5vw, 68px);
+  font-size: clamp(44px, 6vw, 68px);
   line-height: 1.2;
   color: var(--red);
   font-weight: 800;
@@ -337,38 +340,23 @@ button {
   color: var(--muted);
 }
 
-svg {
-  display: block;
-  width: 100%;
-  height: 125px;
-  margin-top: 14px;
-}
+/* VITALS GRID */
 
-path {
-  stroke: var(--red);
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  fill: none;
-  stroke-dasharray: 600;
-  animation: ecg 2.2s linear infinite;
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 26px;
+  margin-bottom: 14px;
 }
-
-@keyframes ecg {
-  0% { stroke-dashoffset: 600; }
-  100% { stroke-dashoffset: 0; }
-}
-
-/* VITAL SIGN CARDS */
 
 .metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 15px;
-  margin-top: 18px;
 }
 
 .metric {
+  min-width: 0;
   background: #fff;
   border: 1px solid var(--line);
   padding: 19px;
@@ -381,6 +369,26 @@ path {
   box-shadow: 0 4px 15px rgba(130, 30, 40, .05);
 }
 
+.metricTop {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 13px;
+}
+
+.metricIcon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 11px;
+  background: var(--red-light);
+  color: var(--red);
+  font-size: 19px;
+  font-weight: 700;
+}
+
 .metric .label {
   color: var(--muted);
   font-size: 13px;
@@ -388,14 +396,72 @@ path {
 }
 
 .metric .val {
-  font-size: clamp(23px, 3vw, 29px);
+  font-size: clamp(21px, 3vw, 28px);
   font-weight: 750;
-  margin-top: 9px;
   color: var(--text);
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+}
+
+.metric .unit {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.metric .hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+/* ECG AND MOTION STATES */
+
+.stateValue {
+  font-size: clamp(17px, 2.2vw, 23px) !important;
+  letter-spacing: -.3px;
+}
+
+.statePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 10px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: #f1f3f6;
+  color: #626b78;
+  font-size: 12px;
+  font-weight: 700;
+  max-width: 100%;
   overflow-wrap: anywhere;
 }
 
-/* STATUS */
+.statePill::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.statePill.good {
+  background: #e8f7ee;
+  color: var(--green);
+}
+
+.statePill.warn {
+  background: #fff3d8;
+  color: var(--yellow);
+}
+
+.statePill.bad {
+  background: var(--red-light);
+  color: var(--red);
+}
+
+/* PATIENT STATUS */
 
 .status {
   text-align: center;
@@ -423,7 +489,7 @@ path {
   50% { opacity: .45; }
 }
 
-/* BACK BUTTON */
+/* NAVIGATION AND EMPTY STATES */
 
 .back-btn {
   display: inline-flex;
@@ -443,8 +509,6 @@ path {
   background: var(--red-light);
   border-color: #e4a4a4;
 }
-
-/* EMPTY STATES */
 
 .emptyState {
   padding: 30px 22px;
@@ -469,13 +533,8 @@ path {
 
 @media (max-width: 800px) {
   .wrapper { padding: 16px; }
-
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
+  .patientGrid { grid-template-columns: 1fr; }
   .title { font-size: 21px; }
-
   .card { padding: 18px; }
 }
 
@@ -491,15 +550,12 @@ path {
 
   .title { font-size: 20px; }
   .live { font-size: 13px; }
-
   .loginBox { padding: 30px 22px; }
-
   .homeGrid { grid-template-columns: 1fr; }
   .metrics { gap: 10px; }
   .metric { padding: 14px; }
-  .monitor { padding: 16px; }
+  .heartCard { padding: 16px; }
   .patient-name { font-size: 25px; }
-  svg { height: 100px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -507,7 +563,6 @@ path {
     animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
-    scroll-behavior: auto !important;
   }
 }
 </style>
@@ -515,7 +570,7 @@ path {
 
 <body>
 
-<!-- LOGIN -->
+<!-- LOGIN SCREEN -->
 <div id="loginScreen">
   <div class="loginBox">
     <div class="loginIcon" aria-hidden="true">✚</div>
@@ -541,13 +596,11 @@ path {
           autocomplete="current-password"
           required
         >
-
         <button
           type="button"
           class="passwordToggle"
           id="passwordToggle"
           aria-label="Show password"
-          title="Show or hide password"
         >◉</button>
       </div>
 
@@ -557,12 +610,11 @@ path {
   </div>
 </div>
 
-<!-- APPLICATION -->
+<!-- MAIN APPLICATION -->
 <div class="wrapper" id="app" style="display:none;">
 
   <div class="topbar">
     <div class="title">Patient Monitoring Center</div>
-
     <div class="live">
       <span class="dot"></span>
       System Online
@@ -579,8 +631,9 @@ path {
 
 let currentRoom = null;
 let refreshTimer = null;
+let activeRequest = null;
 
-/* SHOW / HIDE PASSWORD */
+/* PASSWORD VISIBILITY */
 function togglePassword() {
   const pass = document.getElementById("pass");
   const toggle = document.getElementById("passwordToggle");
@@ -646,21 +699,10 @@ async function login() {
   }
 }
 
-document.getElementById("loginForm").addEventListener("submit", (event) => {
+document.getElementById("loginForm").addEventListener("submit", event => {
   event.preventDefault();
   login();
 });
-
-/* ESCAPE SERVER VALUES BEFORE DISPLAYING THEM AS HTML */
-function escapeHTML(value) {
-  return String(value).replace(/[&<>"']/g, (char) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
-}
 
 /* LOAD ROOMS */
 async function renderHome() {
@@ -680,12 +722,11 @@ async function renderHome() {
       throw new Error("Invalid rooms response");
     }
 
-    const roomIds = Object.keys(rooms);
+    const ids = Object.keys(rooms);
 
-    if (roomIds.length === 0) {
+    if (ids.length === 0) {
       home.innerHTML = `
         <div class="emptyState">
-          <div class="emptyIcon">✚</div>
           <h3>No rooms available</h3>
           <p>The server returned no rooms.</p>
         </div>`;
@@ -695,30 +736,26 @@ async function renderHome() {
     const grid = document.createElement("div");
     grid.className = "homeGrid";
 
-    for (const roomId of roomIds) {
-      const room = rooms[roomId];
+    for (const id of ids) {
       const card = document.createElement("div");
-
       card.className = "homeCard";
-      card.dataset.room = roomId;
       card.setAttribute("role", "button");
       card.setAttribute("tabindex", "0");
 
       const heading = document.createElement("h3");
-      heading.textContent = "Room " + roomId;
+      heading.textContent = "Room " + id;
 
       const description = document.createElement("p");
-      description.textContent = room?.name ?? "Patient room";
+      description.textContent = rooms[id]?.name ?? "Patient room";
 
       card.append(heading, description);
 
-      // Attach the room ID directly instead of generating inline JavaScript.
-      card.addEventListener("click", () => openRoom(roomId));
+      card.addEventListener("click", () => openRoom(id));
 
-      card.addEventListener("keydown", (event) => {
+      card.addEventListener("keydown", event => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          openRoom(roomId);
+          openRoom(id);
         }
       });
 
@@ -738,13 +775,20 @@ async function renderHome() {
         <button class="back-btn" id="retryRooms">Retry</button>
       </div>`;
 
-    document.getElementById("retryRooms").addEventListener("click", renderHome);
+    document.getElementById("retryRooms").addEventListener(
+      "click", renderHome
+    );
   }
 }
 
 /* OPEN ROOM */
 function openRoom(id) {
   currentRoom = String(id);
+
+  if (activeRequest) {
+    activeRequest.abort();
+    activeRequest = null;
+  }
 
   document.getElementById("homeScreen").style.display = "none";
 
@@ -765,19 +809,188 @@ function openRoom(id) {
 function goHome() {
   currentRoom = null;
 
+  if (activeRequest) {
+    activeRequest.abort();
+    activeRequest = null;
+  }
+
   document.getElementById("data").style.display = "none";
   document.getElementById("homeScreen").style.display = "block";
 }
 
+/* DISPLAY ECG STATUS */
+function getEcgStatus(d) {
+  const value = d.ecgStatus ?? d.ecg_status ?? d.rhythm ?? d.ecg;
+
+  if (value === undefined || value === null || value === "") {
+    return {
+      value: "Awaiting data",
+      className: "",
+      hint: "ECG classification unavailable"
+    };
+  }
+
+  const text = String(value);
+  const normalized = text.toLowerCase();
+
+  if (
+    normalized.includes("critical") ||
+    normalized.includes("abnormal") ||
+    normalized.includes("arrhythmia")
+  ) {
+    return {
+      value: text,
+      className: "bad",
+      hint: "Review the ECG analysis"
+    };
+  }
+
+  if (
+    normalized.includes("sinus") ||
+    normalized.includes("normal")
+  ) {
+    return {
+      value: text,
+      className: "good",
+      hint: "Reported rhythm classification"
+    };
+  }
+
+  return {
+    value: text,
+    className: "",
+    hint: "Reported ECG status"
+  };
+}
+
+/* DISPLAY MOTION STATUS */
+function getMotionStatus(d) {
+  const value = d.motion ?? d.motionStatus ?? d.motion_status;
+
+  if (value === undefined || value === null || value === "") {
+    return {
+      value: "Awaiting data",
+      className: "",
+      hint: "Motion data unavailable"
+    };
+  }
+
+  let moving;
+
+  if (typeof value === "boolean") {
+    moving = value;
+  } else if (typeof value === "number") {
+    moving = value !== 0;
+  } else {
+    const normalized = String(value).trim().toLowerCase();
+
+    if ([
+      "yes", "true", "1", "motion", "moving",
+      "detected", "motion detected", "active"
+    ].includes(normalized)) {
+      moving = true;
+    } else if ([
+      "no", "false", "0", "still", "stationary",
+      "not detected", "no motion", "inactive"
+    ].includes(normalized)) {
+      moving = false;
+    } else {
+      return {
+        value: String(value),
+        className: "",
+        hint: "Reported motion status"
+      };
+    }
+  }
+
+  return moving
+    ? {
+        value: "Motion Detected",
+        className: "warn",
+        hint: "Movement reported by sensor"
+      }
+    : {
+        value: "No Motion",
+        className: "good",
+        hint: "No movement reported"
+      };
+}
+
+/* BUILD A VITAL CARD */
+function createMetric({
+  icon,
+  label,
+  value,
+  unit = "",
+  hint = "",
+  stateClass = "",
+  state = false
+}) {
+  const card = document.createElement("div");
+  card.className = "metric";
+
+  const top = document.createElement("div");
+  top.className = "metricTop";
+
+  const iconBox = document.createElement("div");
+  iconBox.className = "metricIcon";
+  iconBox.textContent = icon;
+
+  const labelBox = document.createElement("div");
+  labelBox.className = "label";
+  labelBox.textContent = label;
+
+  top.append(iconBox, labelBox);
+
+  const valueBox = document.createElement("div");
+  valueBox.className = "val" + (state ? " stateValue" : "");
+  valueBox.textContent = value;
+
+  if (unit) {
+    const unitBox = document.createElement("span");
+    unitBox.className = "unit";
+    unitBox.textContent = " " + unit;
+    valueBox.appendChild(unitBox);
+  }
+
+  card.append(top, valueBox);
+
+  if (state) {
+    const pill = document.createElement("div");
+    pill.className = "statePill " + stateClass;
+    pill.textContent = stateClass === "good"
+      ? "Status reported"
+      : stateClass === "warn"
+        ? "Movement reported"
+        : stateClass === "bad"
+          ? "Review status"
+          : "Status unavailable";
+
+    card.appendChild(pill);
+  }
+
+  if (hint) {
+    const hintBox = document.createElement("div");
+    hintBox.className = "hint";
+    hintBox.textContent = hint;
+    card.appendChild(hintBox);
+  }
+
+  return card;
+}
+
 /* UPDATE PATIENT DATA */
 async function update() {
-  if (currentRoom === null) return;
+  if (currentRoom === null || activeRequest) return;
 
   const requestedRoom = currentRoom;
+  const controller = new AbortController();
+  activeRequest = controller;
 
   try {
     const res = await fetch(
-      "/room/" + encodeURIComponent(requestedRoom)
+      "/room/" + encodeURIComponent(requestedRoom),
+      { signal: controller.signal }
     );
 
     if (!res.ok) {
@@ -786,7 +999,6 @@ async function update() {
 
     const d = await res.json();
 
-    // Ignore responses belonging to a room that is no longer selected.
     if (currentRoom !== requestedRoom) return;
 
     const container = document.getElementById("data");
@@ -805,77 +1017,144 @@ async function update() {
     }
 
     const status = String(d.status ?? "No Data");
-    const statusClass = status.toLowerCase();
-    const validStatusClass = ["normal", "warning", "critical"].includes(statusClass)
-      ? statusClass
+    const normalizedStatus = status.toLowerCase();
+
+    const statusClass = ["normal", "warning", "critical"].includes(normalizedStatus)
+      ? normalizedStatus
       : "";
 
-    const blink = statusClass === "critical" ? "blink" : "";
+    const blink = normalizedStatus === "critical" ? "blink" : "";
 
-    container.innerHTML = `
-      <button class="back-btn" id="backButton">← Back</button>
+    container.replaceChildren();
 
-      <div class="grid">
-        <div class="card">
-          <div class="patient-name">${escapeHTML(d.name ?? "Patient")}</div>
-          <div class="sub">Room ${escapeHTML(requestedRoom)}</div>
+    const backButton = document.createElement("button");
+    backButton.className = "back-btn";
+    backButton.textContent = "← Back";
+    backButton.addEventListener("click", goHome);
+    container.appendChild(backButton);
 
-          <div class="monitor">
-            <div class="monitorHeader">
-              <div class="monitorLabel">HEART RATE</div>
-              <div class="liveTag"><span>●</span> Patient vitals</div>
-            </div>
+    const layout = document.createElement("div");
+    layout.className = "patientGrid";
 
-            <div class="bigHr">
-              ${escapeHTML(d.hr ?? "--")} <span>BPM</span>
-            </div>
+    const main = document.createElement("div");
+    main.className = "card";
 
-            <svg viewBox="0 0 500 120" role="img"
-                 aria-label="Decorative ECG waveform">
-              <path d="M0 70 L50 70 L80 35 L100 95 L130 20 L160 70 L220 70 L250 55 L280 70 L500 70"/>
-            </svg>
-          </div>
+    const patientName = document.createElement("div");
+    patientName.className = "patient-name";
+    patientName.textContent = d.name ?? "Patient";
 
-          <div class="metrics">
-            <div class="metric">
-              <div class="label">SpO₂</div>
-              <div class="val">${escapeHTML(d.spo2 ?? "--")}${d.spo2 == null ? "" : "%"}</div>
-            </div>
+    const roomLabel = document.createElement("div");
+    roomLabel.className = "sub";
+    roomLabel.textContent = "Room " + requestedRoom;
 
-            <div class="metric">
-              <div class="label">Body Temperature</div>
-              <div class="val">${escapeHTML(d.bodyTemp ?? "--")}${d.bodyTemp == null ? "" : "°C"}</div>
-            </div>
+    main.append(patientName, roomLabel);
 
-            <div class="metric">
-              <div class="label">Humidity</div>
-              <div class="val">${escapeHTML(d.humidity ?? "--")}${d.humidity == null ? "" : "%"}</div>
-            </div>
+    const heart = document.createElement("div");
+    heart.className = "heartCard";
 
-            <div class="metric">
-              <div class="label">Water Level</div>
-              <div class="val">${escapeHTML(d.water ?? "--")}${d.water == null ? "" : "%"}</div>
-            </div>
-          </div>
-        </div>
+    const heartHeader = document.createElement("div");
+    heartHeader.className = "heartHeader";
 
-        <div class="card status">
-          <div class="sub">Patient Status</div>
-          <h2 class="${validStatusClass} ${blink}">
-            ${escapeHTML(status)}
-          </h2>
-        </div>
-      </div>`;
+    const heartLabel = document.createElement("div");
+    heartLabel.className = "heartLabel";
+    heartLabel.textContent = "HEART RATE";
 
-    document.getElementById("backButton").addEventListener("click", goHome);
+    const liveTag = document.createElement("div");
+    liveTag.className = "liveTag";
+    liveTag.textContent = "● Live readings";
+
+    heartHeader.append(heartLabel, liveTag);
+
+    const bigHr = document.createElement("div");
+    bigHr.className = "bigHr";
+    bigHr.appendChild(
+      document.createTextNode(String(d.hr ?? "--") + " ")
+    );
+
+    const bpm = document.createElement("span");
+    bpm.textContent = "BPM";
+    bigHr.appendChild(bpm);
+
+    heart.append(heartHeader, bigHr);
+    main.appendChild(heart);
+
+    const sectionTitle = document.createElement("h3");
+    sectionTitle.className = "sectionTitle";
+    sectionTitle.textContent = "Vital Signs";
+    main.appendChild(sectionTitle);
+
+    const metrics = document.createElement("div");
+    metrics.className = "metrics";
+
+    const ecg = getEcgStatus(d);
+    const motion = getMotionStatus(d);
+
+    metrics.append(
+      createMetric({
+        icon: "O₂",
+        label: "SpO₂",
+        value: d.spo2 ?? "--",
+        unit: d.spo2 == null ? "" : "%"
+      }),
+
+      createMetric({
+        icon: "°",
+        label: "Body Temperature",
+        value: d.bodyTemp ?? "--",
+        unit: d.bodyTemp == null ? "" : "°C"
+      }),
+
+      createMetric({
+        icon: "♥",
+        label: "ECG Status",
+        value: ecg.value,
+        hint: ecg.hint,
+        stateClass: ecg.className,
+        state: true
+      }),
+
+      createMetric({
+        icon: "↔",
+        label: "Motion",
+        value: motion.value,
+        hint: motion.hint,
+        stateClass: motion.className,
+        state: true
+      }),
+
+      createMetric({
+        icon: "◉",
+        label: "Water Level",
+        value: d.water ?? "--",
+        unit: d.water == null ? "" : "%"
+      })
+    );
+
+    main.appendChild(metrics);
+
+    const side = document.createElement("div");
+    side.className = "card status";
+
+    const statusLabel = document.createElement("div");
+    statusLabel.className = "sub";
+    statusLabel.textContent = "Patient Status";
+
+    const statusHeading = document.createElement("h2");
+    statusHeading.className = statusClass + " " + blink;
+    statusHeading.textContent = status;
+
+    side.append(statusLabel, statusHeading);
+
+    layout.append(main, side);
+    container.appendChild(layout);
 
   } catch (err) {
+    if (err.name === "AbortError") return;
     if (currentRoom !== requestedRoom) return;
 
     console.error("Patient data error:", err);
 
     const container = document.getElementById("data");
-
     container.innerHTML = `
       <button class="back-btn" id="backButton">← Back</button>
       <div class="emptyState">
@@ -884,8 +1163,16 @@ async function update() {
       </div>`;
 
     document.getElementById("backButton").addEventListener("click", goHome);
+
+  } finally {
+    if (activeRequest === controller) {
+      activeRequest = null;
+    }
   }
 }
+
+/* REFRESH EVERY TWO SECONDS */
+refreshTimer = setInterval(update, 2000);
 </script>
 
 </body>
