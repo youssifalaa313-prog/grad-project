@@ -1,196 +1,549 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f8f9fc">
 <title>ICU Monitor Pro</title>
 
 <style>
-:root{
---bg:#071018;
---panel:#0d1b2a;
---panel2:#10263d;
---line:#1d3a57;
---cyan:#4de7ff;
---green:#22c55e;
---yellow:#facc15;
---red:#ef4444;
---text:#eaf6ff;
---muted:#8aa3ba;
+:root {
+  --bg: #f6f7fb;
+  --panel: #ffffff;
+  --panel2: #fff5f5;
+  --line: #eadfe1;
+  --red: #c62828;
+  --red-dark: #a51f27;
+  --red-light: #fee8e8;
+  --green: #16834a;
+  --yellow: #a66b00;
+  --text: #242833;
+  --muted: #727987;
+  --shadow: 0 5px 22px rgba(60, 30, 35, 0.06);
 }
 
-*{box-sizing:border-box;margin:0;padding:0}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-body{
-font-family:Segoe UI,Arial,sans-serif;
-background:linear-gradient(135deg,#06111d,#0b1d31);
-color:var(--text);
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input {
+  font: inherit;
+}
+
+button {
+  transition: background .2s, transform .2s, box-shadow .2s;
 }
 
 /* LOGIN */
-#loginScreen{
-display:flex;
-height:100vh;
-justify-content:center;
-align-items:center;
-background:#06111d;
+
+#loginScreen {
+  display: flex;
+  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top right, #ffe8e8 0, transparent 35%),
+    linear-gradient(145deg, #fffafa, #f5f6fa);
 }
 
-.loginBox{
-background:#0d1b2a;
-padding:30px;
-border-radius:12px;
-width:300px;
-text-align:center;
+.loginBox {
+  width: 100%;
+  max-width: 390px;
+  padding: 38px 32px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--panel);
+  box-shadow: 0 18px 55px rgba(100, 30, 40, .10);
+  text-align: center;
 }
 
-.loginBox input{
-width:100%;
-padding:10px;
-margin:8px 0;
+.loginIcon {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 18px;
+  border-radius: 20px;
+  background: var(--red-light);
+  color: var(--red);
+  font-size: 32px;
 }
 
-.loginBox button{
-width:100%;
-padding:10px;
-background:#4de7ff;
-border:none;
-cursor:pointer;
-font-weight:bold;
+.loginBox h2 {
+  color: var(--red);
+  font-size: 27px;
+  margin-bottom: 8px;
 }
 
-/* APP */
-.wrapper{
-min-height:100vh;
-padding:20px;
+.loginSubtitle {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 26px;
 }
 
-.topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-background:var(--panel);
-padding:16px 20px;
-border-radius:16px;
-border:1px solid var(--line);
-margin-bottom:18px;
+.loginBox input {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  margin: 0 0 14px;
+  border: 1px solid #dfe2e8;
+  border-radius: 10px;
+  outline: none;
+  background: #fff;
+  color: var(--text);
+  transition: border-color .2s, box-shadow .2s;
 }
 
-.title{font-size:24px;font-weight:700}
-
-.live{display:flex;align-items:center;gap:8px;color:var(--green)}
-
-.dot{
-width:10px;height:10px;border-radius:50%;
-background:var(--green);
-animation:pulse 1.5s infinite;
+.loginBox input:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(198, 40, 40, .09);
 }
 
-@keyframes pulse{
-to{box-shadow:0 0 0 14px rgba(34,197,94,0)}
+.passwordWrap {
+  position: relative;
 }
 
-/* HOME */
-.card{
-background:var(--panel);
-border:1px solid var(--line);
-border-radius:18px;
-padding:18px;
-margin-bottom:18px;
+.passwordWrap input {
+  padding-right: 45px;
 }
 
-.homeGrid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-gap:15px;
+.passwordToggle {
+  position: absolute;
+  right: 12px;
+  top: 15px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 17px;
 }
 
-.homeCard{
-background:var(--panel2);
-border:1px solid var(--line);
-padding:16px;
-border-radius:14px;
-cursor:pointer;
-transition:0.3s;
+.loginBox button[type="button"] {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 4px;
+  border: none;
+  border-radius: 10px;
+  background: var(--red);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
 }
 
-.homeCard:hover{
-transform:scale(1.03);
-background:var(--cyan);
-color:#00131c;
+.loginBox button[type="button"]:hover {
+  background: var(--red-dark);
+  box-shadow: 0 5px 15px rgba(198, 40, 40, .18);
 }
 
-/* DASHBOARD */
-.grid{
-display:grid;
-grid-template-columns:2fr 1fr;
-gap:18px;
+#error {
+  margin-top: 14px;
+  font-size: 13px;
 }
 
-.patient-name{font-size:30px;font-weight:700}
-.sub{color:var(--muted)}
+/* APPLICATION */
 
-.monitor{
-margin-top:18px;
-padding:18px;
-border-radius:16px;
-background:#02070d;
-border:1px solid #16324c;
+.wrapper {
+  min-height: 100vh;
+  padding: 24px;
+  max-width: 1800px;
+  margin: 0 auto;
 }
 
-.bigHr{font-size:72px;color:var(--cyan);font-weight:800}
-
-svg{width:100%;height:120px;margin-top:10px;}
-
-path{
-stroke:#4de7ff;
-stroke-width:4;
-fill:none;
-stroke-dasharray:300;
-animation:ecg 1.5s linear infinite;
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: var(--panel);
+  padding: 20px 24px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  margin-bottom: 22px;
 }
 
-@keyframes ecg{
-0%{stroke-dashoffset:300}
-100%{stroke-dashoffset:0}
+.title {
+  font-size: 25px;
+  font-weight: 750;
+  letter-spacing: -.5px;
 }
 
-.metrics{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:14px;
-margin-top:18px;
+.live {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--green);
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.metric{
-background:var(--panel2);
-padding:16px;
-border-radius:14px;
+.dot {
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #20a464;
+  box-shadow: 0 0 0 4px #e6f7ed;
+  animation: pulse 1.8s infinite;
 }
 
-.metric .label{color:var(--muted);font-size:13px}
-.metric .val{font-size:28px;font-weight:700;margin-top:6px}
+@keyframes pulse {
+  50% { box-shadow: 0 0 0 7px rgba(32, 164, 100, .08); }
+}
+
+/* HOME / ROOM SELECTION */
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.homeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.homeCard {
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  padding: 22px;
+  cursor: pointer;
+  transition: .22s ease;
+}
+
+.homeCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--red);
+  opacity: .65;
+}
+
+.homeCard:hover {
+  transform: translateY(-3px);
+  border-color: #e7aaaa;
+  background: #fff8f8;
+  box-shadow: 0 9px 25px rgba(130, 30, 40, .09);
+}
+
+.homeCard h3 {
+  font-size: 19px;
+  color: var(--text);
+  margin-bottom: 9px;
+}
+
+.homeCard p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* PATIENT DASHBOARD */
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.patient-name {
+  font-size: 29px;
+  font-weight: 750;
+  letter-spacing: -.5px;
+  margin-bottom: 6px;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.monitor {
+  margin-top: 22px;
+  padding: 24px;
+  border-radius: 16px;
+  background: #fffafa;
+  border: 1px solid #f0dada;
+  overflow: hidden;
+}
+
+.monitorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.monitorLabel {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.liveTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--red-light);
+  padding: 6px 10px;
+  border-radius: 20px;
+}
+
+.bigHr {
+  font-size: clamp(42px, 5vw, 68px);
+  line-height: 1.2;
+  color: var(--red);
+  font-weight: 800;
+  letter-spacing: -2px;
+  overflow-wrap: anywhere;
+}
+
+.bigHr span {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+
+svg {
+  display: block;
+  width: 100%;
+  height: 125px;
+  margin-top: 14px;
+}
+
+path {
+  stroke: var(--red);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  stroke-dasharray: 600;
+  animation: ecg 2.2s linear infinite;
+}
+
+@keyframes ecg {
+  0% { stroke-dashoffset: 600; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* VITAL SIGN CARDS */
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+  margin-top: 18px;
+}
+
+.metric {
+  background: #fff;
+  border: 1px solid var(--line);
+  padding: 19px;
+  border-radius: 14px;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.metric:hover {
+  border-color: #e7b6b6;
+  box-shadow: 0 4px 15px rgba(130, 30, 40, .05);
+}
+
+.metric .label {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.metric .val {
+  font-size: clamp(23px, 3vw, 29px);
+  font-weight: 750;
+  margin-top: 9px;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
 
 /* STATUS */
-.status{text-align:center;padding:20px}
-.status h2{font-size:30px}
 
-.normal{color:var(--green)}
-.warning{color:var(--yellow)}
-.critical{color:var(--red)}
+.status {
+  text-align: center;
+  padding: 28px 20px;
+}
 
-.blink{animation:blink 1s infinite}
-@keyframes blink{50%{opacity:.4}}
+.status .sub {
+  margin-bottom: 12px;
+}
 
-/* BACK */
-.back-btn{
-margin-bottom:15px;
-padding:10px 15px;
-border:none;
-border-radius:10px;
-cursor:pointer;
-background:var(--cyan);
-color:#00131c;
-font-weight:bold;
+.status h2 {
+  font-size: clamp(24px, 3vw, 32px);
+  overflow-wrap: anywhere;
+}
+
+.normal {
+  color: var(--green);
+}
+
+.warning {
+  color: var(--yellow);
+}
+
+.critical {
+  color: var(--red);
+}
+
+.blink {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  50% { opacity: .45; }
+}
+
+/* BACK BUTTON */
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 11px 17px;
+  border: 1px solid #edc7c7;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #fff;
+  color: var(--red);
+  font-weight: 700;
+}
+
+.back-btn:hover {
+  background: var(--red-light);
+  border-color: #e4a4a4;
+}
+
+/* EMPTY DATA MESSAGE */
+
+.emptyState {
+  padding: 30px 22px;
+  text-align: center;
+  color: var(--muted);
+  background: #fff;
+  border: 1px dashed #e6caca;
+  border-radius: 14px;
+}
+
+.emptyState h3 {
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.emptyIcon {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+/* RESPONSIVE LAYOUT */
+
+@media (max-width: 800px) {
+  .wrapper {
+    padding: 16px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 21px;
+  }
+
+  .card {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  .wrapper {
+    padding: 12px;
+  }
+
+  .topbar {
+    padding: 16px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .live {
+    font-size: 13px;
+  }
+
+  .loginBox {
+    padding: 30px 22px;
+  }
+
+  .homeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics {
+    gap: 10px;
+  }
+
+  .metric {
+    padding: 14px;
+  }
+
+  .monitor {
+    padding: 16px;
+  }
+
+  .patient-name {
+    font-size: 25px;
+  }
+
+  svg {
+    height: 100px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
 }
 </style>
 </head>
@@ -200,161 +553,262 @@ font-weight:bold;
 <!-- LOGIN -->
 <div id="loginScreen">
   <div class="loginBox">
-    <h2 style="color:#4de7ff">ICU Login</h2>
+    <div class="loginIcon" aria-hidden="true">✚</div>
+    <h2>ICU Monitor Pro</h2>
+    <p class="loginSubtitle">Patient Monitoring Center</p>
 
-    <input id="user" placeholder="Username">
+    <form id="loginForm">
+      <input
+        id="user"
+        type="text"
+        placeholder="Username"
+        aria-label="Username"
+        autocomplete="username"
+        required
+      >
 
-    <div style="position:relative;">
-      <input id="pass" type="password" placeholder="Password">
-      <span onclick="togglePassword()" style="
-        position:absolute;
-        right:10px;
-        top:50%;
-        transform:translateY(-50%);
-        cursor:pointer;
-        color:#4de7ff;
-      ">👁</span>
-    </div>
+      <div class="passwordWrap">
+        <input
+          id="pass"
+          type="password"
+          placeholder="Password"
+          aria-label="Password"
+          autocomplete="current-password"
+          required
+        >
+        <button
+          type="button"
+          class="passwordToggle"
+          id="passwordToggle"
+          onclick="togglePassword()"
+          aria-label="Show password"
+          title="Show or hide password"
+        >◉</button>
+      </div>
 
-    <button onclick="login()">Login</button>
-    <p id="error" style="color:red;"></p>
+      <button type="button" onclick="login()">Login</button>
+      <p id="error" role="alert" aria-live="polite"></p>
+    </form>
   </div>
 </div>
 
 <!-- APP -->
 <div class="wrapper" id="app" style="display:none;">
 
-<div class="topbar">
-<div class="title">Patient Monitoring Center</div>
-<div class="live"><span class="dot"></span>System Online</div>
-</div>
+  <div class="topbar">
+    <div class="title">Patient Monitoring Center</div>
+    <div class="live">
+      <span class="dot"></span>
+      System Online
+    </div>
+  </div>
 
-<div id="homeScreen" class="card"></div>
-<div id="data" style="display:none;"></div>
+  <div id="homeScreen" class="card"></div>
+  <div id="data" style="display:none;"></div>
 
 </div>
 
 <script>
+let currentRoom = null;
 
-let currentRoom=null;
+/* SHOW / HIDE PASSWORD */
+function togglePassword() {
+  const pass = document.getElementById("pass");
+  const toggle = document.getElementById("passwordToggle");
 
-/* SHOW/HIDE PASSWORD */
-function togglePassword(){
-  const pass=document.getElementById("pass");
   pass.type = pass.type === "password" ? "text" : "password";
+
+  toggle.setAttribute(
+    "aria-label",
+    pass.type === "password" ? "Show password" : "Hide password"
+  );
 }
 
 /* LOGIN */
-async function login(){
-  const username=document.getElementById("user").value;
-  const password=document.getElementById("pass").value;
+async function login() {
+  const username = document.getElementById("user").value;
+  const password = document.getElementById("pass").value;
+  const error = document.getElementById("error");
 
-  const res=await fetch('/login',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({username,password})
-  });
+  error.innerText = "";
 
-  const data=await res.json();
+  try {
+    const res = await fetch("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
 
-  if(data.success){
-    document.getElementById("loginScreen").style.display="none";
-    document.getElementById("app").style.display="block";
-    renderHome();
-  }else{
-    document.getElementById("error").innerText="Wrong login";
+    const data = await res.json();
+
+    if (data.success) {
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      await renderHome();
+    } else {
+      error.innerText = "Incorrect username or password.";
+    }
+  } catch (err) {
+    error.innerText = "Unable to connect. Please try again.";
   }
 }
 
+/* ALLOW ENTER TO LOG IN */
+document.getElementById("loginForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+  login();
+});
+
 /* LOAD ROOMS */
-async function renderHome(){
-  const res=await fetch('/rooms');
-  const rooms=await res.json();
+async function renderHome() {
+  const home = document.getElementById("homeScreen");
+  home.innerHTML = '<p class="sub">Loading rooms...</p>';
 
-  let html=`<div class="homeGrid">`;
+  try {
+    const res = await fetch("/rooms");
 
-  for(let room in rooms){
-    html+=`
-    <div class="homeCard" onclick="openRoom(${room})">
-      <h3>Room ${room}</h3>
-      <p style="color:#8aa3ba;margin-top:6px">${rooms[room].name}</p>
-    </div>`;
+    if (!res.ok) throw new Error("Could not load rooms");
+
+    const rooms = await res.json();
+    let html = '<div class="homeGrid">';
+
+    for (let room in rooms) {
+      html += `
+        <div class="homeCard" onclick="openRoom(${JSON.stringify(String(room))})" role="button" tabindex="0"
+          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRoom(${JSON.stringify(String(room))})}">
+          <h3>Room ${room}</h3>
+          <p>${rooms[room].name ?? "Patient room"}</p>
+        </div>`;
+    }
+
+    html += "</div>";
+
+    if (Object.keys(rooms).length === 0) {
+      html = '<div class="emptyState"><div class="emptyIcon">✚</div><h3>No rooms available</h3><p>There are currently no rooms to display.</p></div>';
+    }
+
+    home.innerHTML = html;
+  } catch (err) {
+    home.innerHTML = `
+      <div class="emptyState">
+        <h3>Unable to load rooms</h3>
+        <p>Please check the server connection and try again.</p>
+        <br>
+        <button class="back-btn" onclick="renderHome()">Retry</button>
+      </div>`;
   }
-
-  html+=`</div>`;
-  document.getElementById("homeScreen").innerHTML=html;
 }
 
 /* OPEN ROOM */
-function openRoom(id){
-  currentRoom=id;
-  document.getElementById("homeScreen").style.display="none";
-  document.getElementById("data").style.display="block";
+function openRoom(id) {
+  currentRoom = id;
+  document.getElementById("homeScreen").style.display = "none";
+  document.getElementById("data").style.display = "block";
   update();
 }
 
-/* BACK */
-function goHome(){
-  currentRoom=null;
-  document.getElementById("data").style.display="none";
-  document.getElementById("homeScreen").style.display="block";
+/* BACK TO HOME */
+function goHome() {
+  currentRoom = null;
+  document.getElementById("data").style.display = "none";
+  document.getElementById("homeScreen").style.display = "block";
 }
 
-/* UPDATE DATA */
-async function update(){
-  if(!currentRoom) return;
+/* UPDATE PATIENT DATA */
+async function update() {
+  if (!currentRoom) return;
 
-  const res=await fetch('/room/'+currentRoom);
-  const d=await res.json();
+  try {
+    const res = await fetch("/room/" + encodeURIComponent(currentRoom));
 
-  if(d.message){
-    document.getElementById("data").innerHTML="<p>No data yet...</p>";
-    return;
+    if (!res.ok) throw new Error("Could not load patient data");
+
+    const d = await res.json();
+    const container = document.getElementById("data");
+
+    if (!currentRoom) return;
+
+    if (d.message) {
+      container.innerHTML = `
+        <button class="back-btn" onclick="goHome()">← Back</button>
+        <div class="emptyState">
+          <div class="emptyIcon">♡</div>
+          <h3>No patient data yet</h3>
+          <p>Waiting for monitoring data from this room.</p>
+        </div>`;
+      return;
+    }
+
+    const status = String(d.status ?? "No Data");
+    const c = status.toLowerCase();
+    const blink = status === "Critical" ? "blink" : "";
+
+    container.innerHTML = `
+      <button class="back-btn" onclick="goHome()">← Back</button>
+
+      <div class="grid">
+        <div class="card">
+          <div class="patient-name">${d.name ?? "Patient"}</div>
+          <div class="sub">Room ${currentRoom}</div>
+
+          <div class="monitor">
+            <div class="monitorHeader">
+              <div class="monitorLabel">HEART RATE</div>
+              <div class="liveTag"><span>●</span> Patient vitals</div>
+            </div>
+
+            <div class="bigHr">${d.hr ?? "--"} <span>BPM</span></div>
+
+            <svg viewBox="0 0 500 120" role="img" aria-label="Decorative ECG waveform">
+              <path d="M0 70 L50 70 L80 35 L100 95 L130 20 L160 70 L220 70 L250 55 L280 70 L500 70"/>
+            </svg>
+          </div>
+
+          <div class="metrics">
+            <div class="metric">
+              <div class="label">SpO₂</div>
+              <div class="val">${d.spo2 ?? "--"}${d.spo2 == null ? "" : "%"}</div>
+            </div>
+
+            <div class="metric">
+              <div class="label">Body Temperature</div>
+              <div class="val">${d.bodyTemp ?? "--"}${d.bodyTemp == null ? "" : "°C"}</div>
+            </div>
+
+            <div class="metric">
+              <div class="label">Humidity</div>
+              <div class="val">${d.humidity ?? "--"}${d.humidity == null ? "" : "%"}</div>
+            </div>
+
+            <div class="metric">
+              <div class="label">Water Level</div>
+              <div class="val">${d.water ?? "--"}${d.water == null ? "" : "%"}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card status">
+          <div class="sub">Patient Status</div>
+          <h2 class="${["normal", "warning", "critical"].includes(c) ? c : ""} ${blink}">
+            ${status}
+          </h2>
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    if (!currentRoom) return;
+
+    document.getElementById("data").innerHTML = `
+      <button class="back-btn" onclick="goHome()">← Back</button>
+      <div class="emptyState">
+        <h3>Unable to load patient data</h3>
+        <p>Checking the connection again shortly...</p>
+      </div>`;
   }
-
-  const c=d.status.toLowerCase();
-  const blink=d.status==='Critical'?'blink':'';
-
-  document.getElementById("data").innerHTML=`
-  <button class="back-btn" onclick="goHome()">⬅ Back</button>
-
-  <div class="grid">
-
-  <div class="card">
-
-  <div class="patient-name">${d.name}</div>
-  <div class="sub">Room ${currentRoom}</div>
-
-  <div class="monitor">
-  <div class="bigHr">${d.hr} BPM</div>
-
-  <svg viewBox="0 0 500 120">
-  <path d="M0 70 L50 70 L80 35 L100 95 L130 20 L160 70 L220 70 L250 55 L280 70 L500 70"/>
-  </svg>
-  </div>
-
-  <div class="metrics">
-  <div class="metric"><div class="label">SpO₂</div><div class="val">${d.spo2}%</div></div>
-  <div class="metric"><div class="label">Temp</div><div class="val">${d.bodyTemp}°C</div></div>
-  <div class="metric"><div class="label">Humidity</div><div class="val">${d.humidity}%</div></div>
-  <div class="metric"><div class="label">Water</div><div class="val">${d.water}%</div></div>
-  </div>
-
-  </div>
-
-  <div>
-  <div class="card status">
-  <div class="sub">Status</div>
-  <h2 class="${c} ${blink}">${d.status}</h2>
-  </div>
-  </div>
-
-  </div>
-  `;
 }
 
-setInterval(update,2000);
-
+/* REFRESH EVERY 2 SECONDS */
+setInterval(update, 2000);
 </script>
 
 </body>
